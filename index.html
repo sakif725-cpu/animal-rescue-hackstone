@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Animal Rescue</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #1e56a0;
+            --rescue-red: #e63946;
+            --touch-green: #22a55b;
+            --text-dark: #2d3436;
+            --bg-light: #f8faff;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            background-color: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Phone Container Emulation */
+        .phone-container {
+            width: 375px;
+            height: 812px;
+            background: linear-gradient(to bottom, #ffffff 70%, #dbeafe 100%);
+            border-radius: 40px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Header Section */
+        .header {
+            padding: 40px 30px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-box {
+            background-color: var(--primary-blue);
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 30px;
+        }
+
+        .brand-name h1 {
+            margin: 0;
+            font-size: 22px;
+            color: var(--text-dark);
+            line-height: 1.1;
+        }
+
+        .slogan {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 14px;
+            letter-spacing: 1px;
+            margin-bottom: 30px;
+        }
+
+        /* Main Buttons */
+        .content {
+            padding: 0 25px;
+            flex-grow: 1;
+        }
+
+        .report-btn {
+            background: #ffffff;
+            color: var(--text-dark);
+            padding: 0 20px 0 70px;
+            border-radius: 15px;
+            text-align: left;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            height: 78px;
+            margin-bottom: 15px;
+            border: 1px solid #e3e8ee;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+            transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+        }
+
+        .report-btn h2 { display: none; }
+        .report-btn p {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+            text-transform: none;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+
+        .list-btn {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 600;
+            transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+        }
+
+        .btn-left { display: flex; align-items: center; gap: 15px; }
+        .icon-circle { width: 35px; height: 35px; color: #555; }
+
+        .report-btn:hover,
+        .report-btn:focus-visible,
+        .list-btn:hover,
+        .list-btn:focus-visible {
+            background: linear-gradient(135deg, #f85050, #e63946);
+            color: #ffffff;
+            box-shadow: 0 10px 20px rgba(230, 57, 70, 0.3);
+            transform: translateY(-1px);
+            outline: none;
+        }
+
+        .report-btn:active,
+        .list-btn:active {
+            transform: translateY(0);
+        }
+
+        .list-btn:hover .icon-circle,
+        .list-btn:focus-visible .icon-circle,
+        .list-btn:hover span:last-child,
+        .list-btn:focus-visible span:last-child {
+            color: #ffffff;
+        }
+
+        /* Navigation Bar */
+        .nav-bar {
+            background: white;
+            padding: 15px 0 30px;
+            display: flex;
+            justify-content: space-around;
+            border-top: 1px solid #eee;
+        }
+
+        .nav-item {
+            text-align: center;
+            color: #bdc3c7;
+            text-decoration: none;
+            font-size: 12px;
+            transition: color 0.2s ease;
+        }
+
+        .nav-item.active { color: #bdc3c7; }
+        .nav-item i {
+            display: grid;
+            place-items: center;
+            width: 30px;
+            height: 30px;
+            margin: 0 auto 4px;
+            border-radius: 50%;
+            font-size: 18px;
+            line-height: 1;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .nav-item:hover,
+        .nav-item:focus-visible,
+        .nav-item:active {
+            color: var(--touch-green);
+            outline: none;
+        }
+
+        .nav-item:hover i,
+        .nav-item:focus-visible i,
+        .nav-item:active i {
+            background-color: var(--touch-green);
+            color: #ffffff;
+        }
+
+        .nav-item i img {
+            width: 18px;
+            height: 18px;
+            object-fit: contain;
+            display: block;
+            transition: filter 0.2s ease;
+        }
+
+        .nav-item:hover i img,
+        .nav-item:focus-visible i img,
+        .nav-item:active i img {
+            filter: brightness(0) invert(1);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="phone-container">
+    <div class="header">
+        <div class="logo-box">🐾</div>
+        <div class="brand-name">
+            <h1>Smart Animal<br>Rescue</h1>
+        </div>
+    </div>
+
+    <div class="slogan">Report. Rescue. Respond.</div>
+
+    <div class="content">
+        <a href="report.html" class="list-btn">
+            <div class="btn-left">
+                <span class="icon-circle">🩸</span>
+                <span>Report Injured Animal</span>
+            </div>
+            <span>&rsaquo;</span>
+        </a>
+
+        <a href="#" class="list-btn">
+            <div class="btn-left">
+                <span class="icon-circle">📋</span>
+                <span>Track Reports</span>
+            </div>
+            <span>&rsaquo;</span>
+        </a>
+
+        <a href="#" class="list-btn">
+            <div class="btn-left">
+                <span class="icon-circle">📍</span>
+                <span>Nearby NGOs</span>
+            </div>
+            <span>&rsaquo;</span>
+        </a>
+    </div>
+
+    <nav class="nav-bar">
+        <a href="#" class="nav-item active">
+            <i><img src="assets/home.png" alt="Home"></i>
+            Home
+        </a>
+        <a href="#" class="nav-item active">
+            <i><img src="assets/report.png" alt="Reports"></i>
+            Reports
+        </a>
+        <a href="#" class="nav-item">
+            <i>👤</i>
+            Profile
+        </a>
+    </nav>
+</div>
+
+</body>
+</html>
