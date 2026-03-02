@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Report Injured Animal</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -31,7 +31,9 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            min-height: 100dvh;
             overflow: hidden;
+            -webkit-text-size-adjust: 100%;
         }
 
         .phone-container {
@@ -48,6 +50,57 @@
             flex-direction: column;
             position: relative;
             flex: 0 0 auto;
+            max-width: 100%;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                background-color: #ffffff;
+                align-items: stretch;
+                min-height: 100dvh;
+                overflow: auto;
+            }
+
+            .phone-container {
+                width: 100vw;
+                min-width: 100vw;
+                max-width: 100vw;
+                height: 100dvh;
+                min-height: 100dvh;
+                border-radius: 0;
+                box-shadow: none;
+            }
+
+            .header {
+                padding: calc(12px + env(safe-area-inset-top)) 16px 14px;
+            }
+
+            .content {
+                padding: 0 16px calc(12px + env(safe-area-inset-bottom));
+            }
+        }
+
+        @media (min-width: 1024px) {
+            body {
+                padding: 24px;
+                background-color: #eef2f7;
+            }
+
+            .phone-container {
+                width: min(460px, 100%);
+                min-width: 0;
+                max-width: 460px;
+                height: min(860px, calc(100dvh - 48px));
+                min-height: 0;
+            }
+
+            .header {
+                padding: 34px 24px 18px;
+            }
+
+            .content {
+                padding: 0 24px 20px;
+            }
         }
 
         /* Header */
@@ -63,6 +116,12 @@
             text-decoration: none;
             color: var(--text-main);
             font-weight: bold;
+            min-width: 44px;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .header h1 {
@@ -78,6 +137,7 @@
             scrollbar-gutter: stable;
             scrollbar-width: none;
             -ms-overflow-style: none;
+            -webkit-overflow-scrolling: touch;
         }
 
         .content::-webkit-scrollbar {
@@ -112,6 +172,8 @@
             justify-content: center;
             gap: 8px;
             cursor: pointer;
+            min-height: 48px;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .sr-only {
@@ -242,6 +304,15 @@
             gap: 10px;
             cursor: pointer;
             box-shadow: 0 8px 20px rgba(230, 57, 70, 0.3);
+            min-height: 48px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .edit-map {
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            -webkit-tap-highlight-color: transparent;
         }
 
     </style>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Smart Animal Rescue</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -22,19 +22,73 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            min-height: 100dvh;
+            -webkit-text-size-adjust: 100%;
         }
 
         /* Phone Container Emulation */
         .phone-container {
             width: 375px;
+            max-width: 100%;
             height: 812px;
-            background: linear-gradient(to bottom, #ffffff 70%, #dbeafe 100%);
-            border-radius: 40px;
+            background: url('assets/background.jpg') center center / cover no-repeat;
+            border-radius: 0;
             box-shadow: 0 20px 50px rgba(0,0,0,0.2);
             overflow: hidden;
             display: flex;
             flex-direction: column;
             position: relative;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                background-color: #ffffff;
+                align-items: stretch;
+                min-height: 100dvh;
+            }
+
+            .phone-container {
+                width: 100vw;
+                height: 100dvh;
+                border-radius: 0;
+                box-shadow: none;
+            }
+
+            .header {
+                padding: calc(12px + env(safe-area-inset-top)) 20px 16px;
+            }
+
+            .content {
+                padding: 0 16px 12px;
+            }
+
+            .nav-bar {
+                padding: 12px 0 calc(12px + env(safe-area-inset-bottom));
+            }
+        }
+
+        @media (min-width: 1024px) {
+            body {
+                padding: 24px;
+                background-color: #eef2f7;
+            }
+
+            .phone-container {
+                width: min(460px, 100%);
+                height: min(860px, calc(100dvh - 48px));
+            }
+
+            .header {
+                padding: 36px 32px 18px;
+            }
+
+            .content {
+                padding: 0 28px 16px;
+            }
+
+            .nav-bar {
+                padding: 12px 0 20px;
+            }
         }
 
         /* Header Section */
@@ -76,6 +130,8 @@
         .content {
             padding: 0 25px;
             flex-grow: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .report-btn {
@@ -112,12 +168,14 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            min-height: 56px;
             margin-bottom: 15px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             text-decoration: none;
             color: var(--text-dark);
             font-weight: 600;
             transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .btn-left { display: flex; align-items: center; gap: 15px; }
@@ -161,6 +219,9 @@
             text-decoration: none;
             font-size: 12px;
             transition: color 0.2s ease;
+            min-height: 44px;
+            padding: 0 8px;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .nav-item.active { color: #bdc3c7; }
@@ -245,11 +306,11 @@
     </div>
 
     <nav class="nav-bar">
-        <a href="#" class="nav-item active">
+        <a href="index.html" class="nav-item active">
             <i><img src="assets/home.png" alt="Home"></i>
             Home
         </a>
-        <a href="#" class="nav-item active">
+        <a href="report.html" class="nav-item active">
             <i><img src="assets/report.png" alt="Reports"></i>
             Reports
         </a>
