@@ -40,3 +40,6 @@ Thumbs.db
 *.sqlite3
 database.db
 instance/
+
+# Local media not for repo
+login-bg.jpg
