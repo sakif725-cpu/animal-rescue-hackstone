@@ -38,4 +38,5 @@ Thumbs.db
 # Runtime files
 *.log
 *.sqlite3
+database.db
 instance/
