@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #1e56a0;
+            --rescue-red: #e63946;
+            --touch-green: #22a55b;
+            --text-dark: #1f2937;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            background-color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            min-height: 100dvh;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .phone-container {
+            width: 100%;
+            max-width: 448px;
+            min-height: 100dvh;
+            height: 100dvh;
+            background: #ffffff;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                background-color: #ffffff;
+                align-items: stretch;
+            }
+
+            .phone-container {
+                width: 100vw;
+                max-width: none;
+                box-shadow: none;
+            }
+        }
+
+        .back-btn {
+            font-size: 24px;
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: bold;
+            min-width: 44px;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .profile-header {
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .profile-item {
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .profile-item:hover {
+            background: #f8fafc;
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, #f85050, #e63946);
+            color: #ffffff;
+            box-shadow: 0 10px 20px rgba(230, 57, 70, 0.3);
+        }
+
+        .primary-btn:hover {
+            filter: brightness(0.98);
+        }
+
+        .volunteer-logo {
+            mix-blend-mode: multiply;
+        }
+
+        .avatar-button {
+            border: 0;
+            padding: 0;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 9999px;
+        }
+
+        .avatar-button:focus-visible {
+            outline: 2px solid #1e56a0;
+            outline-offset: 3px;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="phone-container">
+        
+        <div class="pt-12 pb-6 px-6 text-center profile-header relative">
+            <a href="index.html" class="back-btn absolute left-4 top-10" id="backBtn" aria-label="Go back">←</a>
+            <h1 class="text-xl font-bold text-gray-800">Profile</h1>
+            
+            <div class="mt-6 flex items-center gap-4 text-left">
+                <div class="relative">
+                    <a href="profile_edit.html" id="avatarButton" class="avatar-button" aria-label="Edit profile photo">
+                        <img id="avatarImage" src="assets/profile.png" alt="Sanjay" class="w-20 h-20 rounded-full border-2 border-white shadow-sm object-cover">
+                    </a>
+                </div>
+                <div>
+                    <h2 id="profileName" class="text-2xl font-bold text-gray-900">Sanjay</h2>
+                    <p id="profilePhone" class="text-gray-500 font-medium">+91 83206 43210</p>
+                    <a href="profile_edit.html" id="editAvatarButton" class="mt-1 inline-block text-sm font-semibold text-blue-600 hover:text-blue-700 transition">Edit photo</a>
+                    <p id="avatarHint" class="text-xs text-gray-400 mt-1">JPG, PNG, WEBP • Max 5MB</p>
+                </div>
+            </div>
+        </div>
+
+        <nav class="flex-grow">
+            <ul class="divide-y divide-gray-100">
+                <li class="profile-item flex items-center gap-4 px-6 py-5 cursor-pointer">
+                    <div class="w-10 text-center text-slate-500 text-xl"><i class="fas fa-shield-halved"></i></div>
+                    <span class="text-lg font-medium text-gray-700">My Reports</span>
+                </li>
+                <li class="profile-item flex items-center gap-4 px-6 py-5 cursor-pointer">
+                    <div class="w-10 text-center text-slate-500 text-xl"><i class="fas fa-map-location-dot"></i></div>
+                    <span class="text-lg font-medium text-gray-700">Nearby NGOs</span>
+                </li>
+                <li class="profile-item flex items-center gap-4 px-6 py-5 cursor-pointer">
+                    <div class="w-10 text-center text-slate-500 text-xl flex items-center justify-center">
+                        <img src="assets/volunter.png" alt="Volunteer" class="volunteer-logo w-9 h-9 object-contain">
+                    </div>
+                    <span class="text-lg font-medium text-gray-700">Volunteer with Us</span>
+                </li>
+                <li class="profile-item flex items-center gap-4 px-6 py-5 cursor-pointer">
+                    <div class="w-10 text-center text-slate-500 text-xl"><i class="fas fa-language"></i></div>
+                    <span class="text-lg font-medium text-gray-700">App Language</span>
+                </li>
+                <li class="profile-item flex items-center gap-4 px-6 py-5 cursor-pointer">
+                    <div class="w-10 text-center text-slate-500 text-xl"><i class="fas fa-question-circle"></i></div>
+                    <span class="text-lg font-medium text-gray-700">Help & FAQs</span>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="px-6 space-y-3 mb-8">
+            <button class="primary-btn w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition">
+                <i class="fas fa-phone-alt"></i>
+                Emergency Call
+            </button>
+            <button class="w-full border-2 border-gray-300 text-gray-500 py-3.5 rounded-2xl font-bold hover:bg-gray-50 transition">
+                Log Out
+            </button>
+        </div>
+
+        <div class="px-8 py-6 bg-gray-50/50">
+            <h3 class="font-black text-gray-900 mb-4 uppercase tracking-wider text-sm">Impact Stats</h3>
+            <div class="grid grid-cols-2 gap-y-3 text-[15px]">
+                <div class="text-gray-700 font-medium">Reports Filed: <span class="font-bold">12</span></div>
+                <div class="text-gray-700 font-medium">Resolved: <span class="font-bold">9</span></div>
+                <div class="text-gray-700 font-medium">Resolved: <span class="font-bold">9</span></div>
+                <div class="text-gray-700 font-medium">Community: <span class="font-bold">0</span></div>
+                <div class="col-span-2 text-gray-700 font-medium pt-1">Community Badges: <span class="font-bold text-blue-600">3</span></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const avatarImage = document.getElementById('avatarImage');
+        const profileName = document.getElementById('profileName');
+        const profilePhone = document.getElementById('profilePhone');
+        const avatarHint = document.getElementById('avatarHint');
+        const avatarStorageKey = 'animalRescue.profile.avatar';
+        const profileStorageKey = 'animalRescue.profile.details';
+        const defaultAvatarSrc = 'assets/profile.png';
+
+        const savedAvatar = localStorage.getItem(avatarStorageKey);
+        if (savedAvatar) {
+            avatarImage.src = savedAvatar;
+            avatarHint.textContent = 'Profile photo updated.';
+            avatarHint.className = 'text-xs text-green-600 mt-1';
+        } else {
+            avatarImage.src = defaultAvatarSrc;
+            avatarHint.textContent = 'Tap Edit photo to update details and photo.';
+            avatarHint.className = 'text-xs text-gray-400 mt-1';
+        }
+
+        const savedProfileRaw = localStorage.getItem(profileStorageKey);
+        if (savedProfileRaw) {
+            try {
+                const savedProfile = JSON.parse(savedProfileRaw);
+                if (savedProfile.name) {
+                    profileName.textContent = savedProfile.name;
+                }
+                if (savedProfile.phone) {
+                    profilePhone.textContent = savedProfile.phone;
+                }
+            } catch (error) {
+                localStorage.removeItem(profileStorageKey);
+            }
+        }
+
+    </script>
+</body>
+</html>

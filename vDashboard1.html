@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Case Details UI</title>
+    <style>
+        :root {
+            --primary-bg: #f8f9ff;
+            --critical-red: #e95d6a;
+            --text-dark: #2d3436;
+            --text-gray: #636e72;
+            --accent-blue: #5468ff;
+            --success-green: #52a382;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            background-color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            min-height: 100dvh;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .phone-container {
+            width: 100%;
+            max-width: 448px;
+            min-height: 100dvh;
+            height: 100dvh;
+            background: white;
+            border-radius: 0;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                background-color: #ffffff;
+                align-items: stretch;
+                min-height: 100dvh;
+            }
+
+            .phone-container {
+                width: 100vw;
+                max-width: none;
+                height: 100dvh;
+                border-radius: 0;
+                box-shadow: none;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            body {
+                padding: 24px;
+                background-color: #eef2f7;
+            }
+
+            .phone-container {
+                width: min(460px, 100%);
+                height: min(860px, calc(100dvh - 48px));
+            }
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            font-weight: bold;
+            color: var(--text-dark);
+        }
+
+        .back-btn {
+            font-size: 24px;
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: bold;
+            min-width: 44px;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Map Section */
+        .map-placeholder {
+            width: 100%;
+            height: 200px;
+            background-color: #d1d8e0;
+            background-image: url('https://via.placeholder.com/400x200?text=Map+View'); /* Replace with real Map API */
+            background-size: cover;
+            position: relative;
+        }
+
+        /* Content Section */
+        .content {
+            padding: 20px;
+        }
+
+        .status-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .badge-critical {
+            background-color: var(--critical-red);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .case-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .description {
+            font-size: 14px;
+            color: var(--text-gray);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Reporter Card */
+        .reporter-card {
+            border: 1px solid #edf2f7;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #eee;
+        }
+
+        .user-details h4 { margin: 0; font-size: 16px; }
+        .user-details p { margin: 0; font-size: 14px; color: var(--text-gray); }
+
+        .location-info {
+            font-size: 14px;
+            color: var(--text-gray);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-top: 10px;
+            border-top: 1px solid #f1f1f1;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .btn-call { background-color: var(--success-green); color: white; }
+        .btn-nav { background-color: white; border: 1px solid #ddd; color: var(--text-dark); }
+        
+        .btn-complete {
+            width: 100%;
+            background-color: #f8f9fa;
+            color: var(--success-green);
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="phone-container">
+    <div class="header">
+        <a href="volunteer_dashboard.html" class="back-btn" id="backBtn" aria-label="Go back">←</a>
+        <span>Case Details</span>
+        <span>&times;</span>
+    </div>
+
+    <div class="map-placeholder"></div>
+
+    <div class="content">
+        <div class="status-row">
+            <span class="badge-critical">Critical</span>
+            <span class="case-title">Injured Dog</span>
+        </div>
+
+        <div class="description">
+            <span style="color:var(--accent-blue)">ⓘ</span> 
+            Hit by bike, bleeding from leg
+        </div>
+
+        <div class="reporter-card">
+            <div class="user-info">
+                <div class="avatar"></div>
+                <div class="user-details">
+                    <h4>Amit Sharma</h4>
+                    <p>+91 98765 43210</p>
+                </div>
+            </div>
+            <div class="location-info">
+                📍 456 Elm Street, City Center
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button class="btn btn-call">📞 Call Reporter</button>
+            <button class="btn btn-nav">🚀 Navigate</button>
+        </div>
+
+        <button class="btn btn-complete">✓ Mark as Completed</button>
+    </div>
+</div>
+
+<script>
+    const backBtn = document.getElementById('backBtn');
+
+    backBtn.addEventListener('click', function (event) {
+        if (window.history.length > 1) {
+            event.preventDefault();
+            window.history.back();
+        }
+    });
+</script>
+
+</body>
+</html>

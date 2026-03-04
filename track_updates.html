@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Reports</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8fafc;
+            font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .back-btn {
+            font-size: 24px;
+            text-decoration: none;
+            color: #374151;
+            font-weight: bold;
+            min-width: 44px;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .map-bg {
+            background-image: url('https://api.mapbox.com/styles/v1/mapbox/light-v10/static/0,0,1/400x200?access_token=YOUR_TOKEN_HERE');
+            background-size: cover;
+            background-position: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 flex justify-center min-h-screen">
+
+    <div class="w-full max-w-md bg-white min-h-screen flex flex-col shadow-lg">
+        
+        <header class="p-6 flex justify-between items-center">
+            <a href="index.html" class="back-btn" id="backBtn" aria-label="Go back" onclick="goBack(); return false;">←</a>
+            <h1 class="text-xl font-bold text-gray-900">Track Reports</h1>
+            <div class="w-9" aria-hidden="true"></div>
+        </header>
+
+        <div class="px-6 mb-6">
+            <div class="relative group">
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-blue-500"></i>
+                <input type="text" placeholder="Search by Case ID or keyword" 
+                       class="w-full bg-blue-50/50 border-none py-3.5 pl-12 pr-4 rounded-2xl text-sm focus:ring-2 focus:ring-blue-100 outline-none transition-all">
+            </div>
+        </div>
+
+        <div class="px-6 flex gap-3 mb-8">
+            <button class="flex-1 py-3 bg-gray-100 text-gray-500 font-bold rounded-xl hover:bg-blue-600 hover:text-white hover:shadow-md hover:shadow-blue-200 transition">Current</button>
+            <button class="flex-1 py-3 bg-gray-100 text-gray-500 font-bold rounded-xl hover:bg-blue-600 hover:text-white hover:shadow-md hover:shadow-blue-200 transition">Past</button>
+        </div>
+
+        <div class="mx-6 bg-white rounded-[2rem] border border-gray-100 shadow-xl shadow-gray-200/50 overflow-hidden">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex items-center gap-2 px-3 py-1 bg-green-50 rounded-full">
+                        <i class="fas fa-check-circle text-green-500 text-xs"></i>
+                        <span id="caseIdText" class="text-xs font-bold text-gray-500 uppercase tracking-tight">Case ID #2904</span>
+                    </div>
+                    <span id="caseAgeText" class="text-xs font-semibold text-gray-400">5 mins</span>
+                </div>
+                
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center text-white shadow-lg shadow-green-100">
+                        <i class="fas fa-eye text-xl"></i>
+                    </div>
+                    <h2 id="caseTitleText" class="text-2xl font-extrabold text-gray-800 leading-tight">Help is on the way</h2>
+                </div>
+
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-location-dot text-blue-900 text-lg"></i>
+                        <span id="caseLocationText" class="font-bold text-gray-700">City Center</span>
+                    </div>
+                    <span id="caseUpdatedText" class="text-xs font-medium text-gray-400">3 mins ago</span>
+                </div>
+            </div>
+
+            <div class="h-48 bg-blue-50 relative map-bg border-t border-gray-50">
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                    <div class="relative">
+                        <div class="w-14 h-14 rounded-full border-[3px] border-white shadow-xl overflow-hidden bg-white">
+                            <img id="casePhotoPreview" src="https://i.pravatar.cc/100?img=11" alt="Reported animal preview">
+                        </div>
+                        <div class="absolute -bottom-1 right-0 w-5 h-5 bg-green-500 border-2 border-white rounded-full flex items-center justify-center">
+                            <i class="fas fa-shield text-[8px] text-white"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="px-10 mt-8 space-y-6">
+            <div class="relative border-l-2 border-gray-100 pl-6 py-1">
+                <div class="absolute -left-[9px] top-2 w-4 h-4 bg-white border-2 border-gray-200 rounded-full"></div>
+                <p class="text-[15px] text-gray-600 leading-relaxed">
+                    <span class="font-bold text-gray-900" id="timelineActorText">Volunteer John</span> <span id="timelineText">accepted the case.</span>
+                </p>
+                <span id="timelineTimeText" class="text-xs font-bold text-gray-300 mt-1 block">5:13 AM</span>
+            </div>
+        </div>
+
+        <div class="mt-auto p-6">
+            <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-lg shadow-blue-100 transition-all active:scale-[0.98]">
+                <i class="fas fa-briefcase"></i>
+                Track Updates
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        function formatMinutesAgo(isoString) {
+            const submittedAt = new Date(isoString);
+            const diffMs = Date.now() - submittedAt.getTime();
+            const mins = Math.max(1, Math.floor(diffMs / 60000));
+            if (mins < 60) {
+                return mins + ' mins';
+            }
+            const hours = Math.floor(mins / 60);
+            return hours + ' hrs';
+        }
+
+        function formatClockTime(isoString) {
+            const date = new Date(isoString);
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function applyLatestReport() {
+            const reports = JSON.parse(localStorage.getItem('animalRescue.reports') || '[]');
+            if (!reports.length) {
+                return;
+            }
+
+            const latest = reports[0];
+            const shortAddress = (latest.address || 'Unknown location').split(',').slice(0, 2).join(',').trim();
+
+            document.getElementById('caseIdText').textContent = 'Case ID #' + (latest.id || '0000');
+            document.getElementById('caseAgeText').textContent = formatMinutesAgo(latest.submittedAt || new Date().toISOString());
+            document.getElementById('caseUpdatedText').textContent = formatMinutesAgo(latest.submittedAt || new Date().toISOString()) + ' ago';
+            document.getElementById('caseTitleText').textContent = 'Condition: ' + (latest.condition || 'Injured');
+            document.getElementById('caseLocationText').textContent = shortAddress || 'Unknown location';
+            document.getElementById('timelineActorText').textContent = 'Dispatch Team';
+            document.getElementById('timelineText').textContent = 'received your report.';
+            document.getElementById('timelineTimeText').textContent = formatClockTime(latest.submittedAt || new Date().toISOString());
+
+            if (latest.photoData) {
+                document.getElementById('casePhotoPreview').src = latest.photoData;
+            }
+        }
+
+        applyLatestReport();
+
+        function goBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+                return;
+            }
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Edit Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --text-dark: #1f2937;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            background-color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            min-height: 100dvh;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .phone-container {
+            width: 100%;
+            max-width: 448px;
+            min-height: 100dvh;
+            height: 100dvh;
+            background: #ffffff;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                background-color: #ffffff;
+                align-items: stretch;
+            }
+
+            .phone-container {
+                width: 100vw;
+                max-width: none;
+                box-shadow: none;
+            }
+        }
+
+        .back-btn {
+            font-size: 24px;
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: bold;
+            min-width: 44px;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-tap-highlight-color: transparent;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        <header class="pt-12 pb-5 px-6 border-b border-slate-100 relative">
+            <a href="profile.html" class="back-btn absolute left-4 top-10" aria-label="Go back">←</a>
+            <h1 class="text-xl font-bold text-gray-800 text-center">Edit Profile</h1>
+        </header>
+
+        <main class="flex-1 overflow-y-auto px-6 py-6">
+            <form id="editProfileForm" class="space-y-5">
+                <div class="flex items-center gap-4">
+                    <img id="editAvatarPreview" src="assets/profile.png" alt="Profile preview" class="w-20 h-20 rounded-full border-2 border-white shadow-sm object-cover">
+                    <div class="flex-1">
+                        <button type="button" id="choosePhotoBtn" class="w-full border border-slate-300 text-slate-600 py-2.5 rounded-xl font-semibold hover:bg-slate-50 transition">Choose Photo</button>
+                        <input type="file" id="editAvatarInput" accept="image/jpeg,image/png,image/webp" class="hidden">
+                        <p id="editAvatarHint" class="text-xs text-gray-400 mt-2">JPG, PNG, WEBP • Max 5MB</p>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="nameInput" class="block text-sm font-semibold text-slate-600 mb-2">Name</label>
+                    <input id="nameInput" type="text" class="w-full border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-100" placeholder="Enter name" required>
+                </div>
+
+                <div>
+                    <label for="phoneInput" class="block text-sm font-semibold text-slate-600 mb-2">Phone</label>
+                    <input id="phoneInput" type="tel" class="w-full border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-100" placeholder="Enter phone" required>
+                </div>
+
+                <div>
+                    <label for="emailInput" class="block text-sm font-semibold text-slate-600 mb-2">Email</label>
+                    <input id="emailInput" type="email" class="w-full border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-100" placeholder="Enter email">
+                </div>
+
+                <div>
+                    <label for="addressInput" class="block text-sm font-semibold text-slate-600 mb-2">Address</label>
+                    <textarea id="addressInput" rows="3" class="w-full border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-100" placeholder="Enter address"></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 pt-2">
+                    <a href="profile.html" class="text-center border-2 border-gray-300 text-gray-500 py-3.5 rounded-2xl font-bold hover:bg-gray-50 transition">Cancel</a>
+                    <button type="submit" class="bg-gradient-to-r from-red-500 to-red-600 text-white py-3.5 rounded-2xl font-bold shadow-md hover:brightness-95 transition">Save</button>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <script>
+        const avatarStorageKey = 'animalRescue.profile.avatar';
+        const profileStorageKey = 'animalRescue.profile.details';
+        const defaultAvatarSrc = 'assets/profile.png';
+        const maxAvatarSizeInBytes = 5 * 1024 * 1024;
+        const allowedAvatarTypes = ['image/jpeg', 'image/png', 'image/webp'];
+
+        const form = document.getElementById('editProfileForm');
+        const nameInput = document.getElementById('nameInput');
+        const phoneInput = document.getElementById('phoneInput');
+        const emailInput = document.getElementById('emailInput');
+        const addressInput = document.getElementById('addressInput');
+        const avatarInput = document.getElementById('editAvatarInput');
+        const avatarPreview = document.getElementById('editAvatarPreview');
+        const choosePhotoBtn = document.getElementById('choosePhotoBtn');
+        const avatarHint = document.getElementById('editAvatarHint');
+
+        let pendingAvatarData = null;
+
+        const savedAvatar = localStorage.getItem(avatarStorageKey);
+        avatarPreview.src = savedAvatar || defaultAvatarSrc;
+
+        const savedProfileRaw = localStorage.getItem(profileStorageKey);
+        const savedProfile = savedProfileRaw ? JSON.parse(savedProfileRaw) : {};
+
+        nameInput.value = savedProfile.name || 'Sanjay';
+        phoneInput.value = savedProfile.phone || '+91 83206 43210';
+        emailInput.value = savedProfile.email || '';
+        addressInput.value = savedProfile.address || '';
+
+        choosePhotoBtn.addEventListener('click', function () {
+            avatarInput.click();
+        });
+
+        avatarInput.addEventListener('change', function (event) {
+            const [file] = event.target.files;
+            if (!file) {
+                return;
+            }
+
+            if (!allowedAvatarTypes.includes(file.type)) {
+                avatarHint.textContent = 'Use JPG, PNG, or WEBP only.';
+                avatarHint.className = 'text-xs text-red-500 mt-2';
+                avatarInput.value = '';
+                return;
+            }
+
+            if (file.size > maxAvatarSizeInBytes) {
+                avatarHint.textContent = 'Image is too large. Max size is 5MB.';
+                avatarHint.className = 'text-xs text-red-500 mt-2';
+                avatarInput.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (loadEvent) {
+                const imageData = loadEvent.target.result;
+                if (typeof imageData !== 'string') {
+                    return;
+                }
+                pendingAvatarData = imageData;
+                avatarPreview.src = imageData;
+                avatarHint.textContent = 'Photo selected. Tap Save to apply.';
+                avatarHint.className = 'text-xs text-green-600 mt-2';
+            };
+            reader.readAsDataURL(file);
+            avatarInput.value = '';
+        });
+
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const profileDetails = {
+                name: nameInput.value.trim(),
+                phone: phoneInput.value.trim(),
+                email: emailInput.value.trim(),
+                address: addressInput.value.trim()
+            };
+
+            localStorage.setItem(profileStorageKey, JSON.stringify(profileDetails));
+
+            if (pendingAvatarData) {
+                localStorage.setItem(avatarStorageKey, pendingAvatarData);
+            }
+
+            window.location.href = 'profile.html';
+        });
+    </script>
+</body>
+</html>

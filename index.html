@@ -4,20 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Smart Animal Rescue</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-blue: #1e56a0;
             --rescue-red: #e63946;
             --touch-green: #22a55b;
-            --text-dark: #2d3436;
-            --bg-light: #f8faff;
+            --text-dark: #1f2937;
+            --bg-light: #f8fafc;
         }
 
         body {
-            font-family: 'Poppins', sans-serif;
+            font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
-            background-color: #e0e0e0;
+            background-color: #f8fafc;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -28,12 +27,13 @@
 
         /* Phone Container Emulation */
         .phone-container {
-            width: 375px;
-            max-width: 100%;
-            height: 812px;
-            background: url('assets/background.jpg') center center / cover no-repeat;
+            width: 100%;
+            max-width: 448px;
+            min-height: 100dvh;
+            height: 100dvh;
+            background: #ffffff;
             border-radius: 0;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -49,6 +49,7 @@
 
             .phone-container {
                 width: 100vw;
+                max-width: none;
                 height: 100dvh;
                 border-radius: 0;
                 box-shadow: none;
@@ -120,7 +121,7 @@
 
         .slogan {
             text-align: center;
-            color: #7f8c8d;
+            color: #6b7280;
             font-size: 14px;
             letter-spacing: 1px;
             margin-bottom: 30px;
@@ -164,13 +165,13 @@
         .list-btn {
             background: white;
             padding: 20px;
-            border-radius: 15px;
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             min-height: 56px;
             margin-bottom: 15px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
             text-decoration: none;
             color: var(--text-dark);
             font-weight: 600;
@@ -179,7 +180,7 @@
         }
 
         .btn-left { display: flex; align-items: center; gap: 15px; }
-        .icon-circle { width: 35px; height: 35px; color: #555; }
+        .icon-circle { width: 35px; height: 35px; color: #475569; }
 
         .report-btn:hover,
         .report-btn:focus-visible,
@@ -210,12 +211,12 @@
             padding: 15px 0 30px;
             display: flex;
             justify-content: space-around;
-            border-top: 1px solid #eee;
+            border-top: 1px solid #f1f5f9;
         }
 
         .nav-item {
             text-align: center;
-            color: #bdc3c7;
+            color: #9ca3af;
             text-decoration: none;
             font-size: 12px;
             transition: color 0.2s ease;
@@ -224,7 +225,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        .nav-item.active { color: #bdc3c7; }
+        .nav-item.active { color: #6b7280; }
         .nav-item i {
             display: grid;
             place-items: center;
@@ -288,7 +289,15 @@
             <span>&rsaquo;</span>
         </a>
 
-        <a href="#" class="list-btn">
+        <a href="volunteer_dashboard.html" class="list-btn">
+            <div class="btn-left">
+                <span class="icon-circle">🤝</span>
+                <span>Volunteer</span>
+            </div>
+            <span>&rsaquo;</span>
+        </a>
+
+        <a href="track_updates.html" class="list-btn">
             <div class="btn-left">
                 <span class="icon-circle">📋</span>
                 <span>Track Reports</span>
@@ -314,7 +323,7 @@
             <i>📄</i>
             Reports
         </a>
-        <a href="#" class="nav-item">
+        <a href="profile.html" class="nav-item">
             <i>👤</i>
             Profile
         </a>

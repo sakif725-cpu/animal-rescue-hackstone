@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Report Injured Animal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             box-sizing: border-box;
@@ -13,9 +12,9 @@
         :root {
             --primary-blue: #1e56a0;
             --rescue-red: #e63946;
-            --text-main: #333;
-            --text-muted: #7f8c8d;
-            --bg-body: #f4f7fe;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --bg-body: #f8fafc;
         }
 
         html, body {
@@ -24,8 +23,8 @@
         }
 
         body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #e0e0e0;
+            font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8fafc;
             margin: 0;
             display: flex;
             justify-content: center;
@@ -37,14 +36,14 @@
         }
 
         .phone-container {
-            width: 375px;
-            min-width: 375px;
-            max-width: 375px;
-            height: 812px;
-            min-height: 812px;
+            width: 100%;
+            min-width: 0;
+            max-width: 448px;
+            height: 100dvh;
+            min-height: 100dvh;
             background-color: white;
-            border-radius: 40px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            border-radius: 0;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -200,11 +199,11 @@
         /* Location Section */
         .location-card {
             background: #fff;
-            border: 1px solid #eee;
-            border-radius: 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
             padding: 15px;
             margin-bottom: 25px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
         }
 
         .loc-header {
@@ -350,7 +349,7 @@
         </div>
 
         <span class="label">Condition</span>
-        <select class="custom-select">
+        <select class="custom-select" id="conditionSelect">
             <option>Injured</option>
             <option>Sick</option>
             <option>Stray/Lost</option>
@@ -358,7 +357,7 @@
 
         <p class="info-note">Normal rescue will be solved tomorrow.</p>
 
-        <button class="submit-btn">
+        <button class="submit-btn" id="submitReportBtn" type="button">
             ⚠️ Submit Emergency Report
         </button>
     </div>
@@ -376,7 +375,10 @@
     const zoomLabel = document.getElementById('zoomLabel');
     const coordinatesText = document.getElementById('coordinatesText');
     const locationStatus = document.getElementById('locationStatus');
+    const conditionSelect = document.getElementById('conditionSelect');
+    const submitReportBtn = document.getElementById('submitReportBtn');
     let currentLocation = null;
+    let selectedPhotoData = '';
 
     function renderMap() {
         if (!currentLocation) {
@@ -412,10 +414,18 @@
             return;
         }
 
-        const previewUrl = URL.createObjectURL(selectedFile);
-        photoPreview.src = previewUrl;
-        photoPreview.alt = selectedFile.name || 'Selected injured animal photo';
-        addPhotosBtn.innerHTML = '<span>📷</span> Photo selected (' + photoInput.files.length + ')';
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            const result = event.target && event.target.result;
+            if (typeof result !== 'string') {
+                return;
+            }
+            selectedPhotoData = result;
+            photoPreview.src = result;
+            photoPreview.alt = selectedFile.name || 'Selected injured animal photo';
+            addPhotosBtn.innerHTML = '<span>📷</span> Photo selected (' + photoInput.files.length + ')';
+        };
+        reader.readAsDataURL(selectedFile);
     });
 
     function setLocationError(message) {
@@ -441,42 +451,47 @@
     async function detectLocation() {
         if (!navigator.geolocation) {
             setLocationError('Geolocation is not supported by this browser.');
-            return;
+            return null;
         }
 
         setLocationError('Detecting location...');
 
-        navigator.geolocation.getCurrentPosition(
-            async function (position) {
-                const latitude = position.coords.latitude.toFixed(6);
-                const longitude = position.coords.longitude.toFixed(6);
-                currentLocation = { latitude: latitude, longitude: longitude };
+        return new Promise(function (resolve) {
+            navigator.geolocation.getCurrentPosition(
+                async function (position) {
+                    const latitude = position.coords.latitude.toFixed(6);
+                    const longitude = position.coords.longitude.toFixed(6);
+                    currentLocation = { latitude: latitude, longitude: longitude };
 
-                coordinatesText.textContent = 'Coordinates: ' + latitude + ', ' + longitude;
-                renderMap();
+                    coordinatesText.textContent = 'Coordinates: ' + latitude + ', ' + longitude;
+                    renderMap();
 
-                try {
-                    const address = await reverseGeocode(latitude, longitude);
-                    if (address) {
-                        addressText.textContent = '📍 ' + address;
-                    } else {
+                    try {
+                        const address = await reverseGeocode(latitude, longitude);
+                        if (address) {
+                            addressText.textContent = '📍 ' + address;
+                        } else {
+                            addressText.textContent = '📍 ' + latitude + ', ' + longitude;
+                        }
+                        setLocationError('');
+                    } catch (error) {
                         addressText.textContent = '📍 ' + latitude + ', ' + longitude;
+                        setLocationError('Location detected. Address lookup unavailable right now.');
                     }
-                    setLocationError('');
-                } catch (error) {
-                    addressText.textContent = '📍 ' + latitude + ', ' + longitude;
-                    setLocationError('Location detected. Address lookup unavailable right now.');
+
+                    resolve(currentLocation);
+                },
+                function () {
+                    setLocationError('Unable to detect location. Please allow location access.');
+                    resolve(null);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
                 }
-            },
-            function () {
-                setLocationError('Unable to detect location. Please allow location access.');
-            },
-            {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 0
-            }
-        );
+            );
+        });
     }
 
     editMapBtn.addEventListener('click', function (event) {
@@ -494,6 +509,50 @@
     zoomSlider.addEventListener('input', function () {
         zoomLabel.textContent = 'Zoom: ' + zoomSlider.value;
         renderMap();
+    });
+
+    submitReportBtn.addEventListener('click', async function () {
+        if (!selectedPhotoData) {
+            setLocationError('Please add at least one photo before submitting.');
+            photoInput.click();
+            return;
+        }
+
+        if (!currentLocation) {
+            await detectLocation();
+        }
+
+        if (!currentLocation) {
+            setLocationError('Location is required to submit. Please enable location access.');
+            return;
+        }
+
+        submitReportBtn.disabled = true;
+        submitReportBtn.style.opacity = '0.8';
+        submitReportBtn.textContent = 'Submitting report...';
+
+        const reportId = 'R' + String(Date.now()).slice(-6);
+        const report = {
+            id: reportId,
+            submittedAt: new Date().toISOString(),
+            condition: conditionSelect.value,
+            address: addressText.textContent.replace(/^📍\s*/, ''),
+            latitude: currentLocation.latitude,
+            longitude: currentLocation.longitude,
+            photoData: selectedPhotoData
+        };
+
+        const reportsKey = 'animalRescue.reports';
+        const existingReports = JSON.parse(localStorage.getItem(reportsKey) || '[]');
+        existingReports.unshift(report);
+        localStorage.setItem(reportsKey, JSON.stringify(existingReports.slice(0, 50)));
+
+        setLocationError('Report submitted successfully. Redirecting to tracking...');
+        submitReportBtn.textContent = 'Submitted ✓';
+
+        setTimeout(function () {
+            window.location.href = 'track_updates.html';
+        }, 700);
     });
 </script>
 

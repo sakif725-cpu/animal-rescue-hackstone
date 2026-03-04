@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volunteer Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #f4f7ff;
+            --primary-blue: #00224d;
+            --accent-blue: #3d7eff;
+            --critical-red: #d9534f;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8fafc;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            min-height: 100dvh;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .phone-container {
+            width: 100%;
+            max-width: 448px;
+            min-height: 100dvh;
+            height: 100dvh;
+            background: white;
+            border-radius: 0;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                background-color: #ffffff;
+                align-items: stretch;
+                min-height: 100dvh;
+            }
+
+            .phone-container {
+                width: 100vw;
+                max-width: none;
+                height: 100dvh;
+                border-radius: 0;
+                box-shadow: none;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            body {
+                padding: 24px;
+                background-color: #eef2f7;
+            }
+
+            .phone-container {
+                width: min(460px, 100%);
+                height: min(860px, calc(100dvh - 48px));
+            }
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--primary-blue);
+        }
+        .notification-bell {
+            position: relative;
+            background: #eef2ff;
+            padding: 8px;
+            border-radius: 10px;
+            color: var(--accent-blue);
+            border: none;
+            cursor: pointer;
+        }
+        .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--critical-red);
+            color: white;
+            font-size: 10px;
+            padding: 2px 5px;
+            border-radius: 50%;
+        }
+
+        /* Welcome Section */
+        h1 { font-size: 1.6rem; color: var(--primary-blue); margin: 0; }
+        .welcome-text { color: #666; font-size: 0.9rem; margin-top: 10px; line-height: 1.4; }
+
+        /* Profile Card */
+        .profile-card {
+            background: white;
+            border-radius: 20px;
+            padding: 15px;
+            margin-top: 20px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid #f0f0f0;
+            transition: box-shadow 0.2s ease, border-color 0.2s ease;
+            cursor: default;
+        }
+
+        .profile-card * {
+            cursor: default;
+        }
+
+        .profile-card.focused {
+            border-color: #3d7eff;
+            box-shadow: 0 0 0 3px rgba(61, 126, 255, 0.2);
+        }
+        .profile-header { display: flex; align-items: center; gap: 15px; }
+        .avatar { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; }
+        .name-row { flex-grow: 1; }
+        .name-row h2 { margin: 0; font-size: 1.1rem; }
+        .stats-brief { color: #555; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; margin-top: 5px; }
+        .cases-tag { background: #eef2ff; padding: 4px 10px; border-radius: 15px; font-weight: bold; margin-left: auto; }
+        
+        .location-bar {
+            background: #f8f9ff;
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            color: #555;
+        }
+
+        /* Stats Section */
+        .stats-list { margin-top: 20px; }
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            box-shadow: var(--card-shadow);
+        }
+        .stat-label { display: flex; align-items: center; gap: 10px; font-weight: 500; }
+        .stat-value { font-weight: bold; font-size: 1.1rem; color: var(--primary-blue); }
+        .stat-value span { font-size: 0.8rem; font-weight: normal; }
+
+        .yellow { background: linear-gradient(to right, #fff9e6, #fff); }
+        .green { background: linear-gradient(to right, #eefaf6, #fff); }
+        .blue { background: linear-gradient(to right, #f0f7ff, #fff); }
+
+        /* Urgent Case Card */
+        .critical-card {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 20px;
+            border: 1px solid #f0f0f0;
+            box-shadow: var(--card-shadow);
+        }
+        .critical-badge {
+            background: var(--critical-red);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .critical-title { font-weight: bold; margin-left: 5px; }
+        .distance { color: #666; font-size: 0.9rem; text-align: center; margin: 15px 0; }
+        .map-btn {
+            background: var(--accent-blue);
+            color: white;
+            width: 100%;
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="phone-container">
+    <div class="header">
+        <div class="logo">
+            <i class="fas fa-paw"></i> Smart Animal Rescue
+        </div>
+        <button type="button" id="openVolunteerProfile" class="notification-bell" aria-label="Open volunteer profile">
+            <i class="fas fa-inbox"></i>
+        </button>
+    </div>
+
+    <h1>Volunteer Dashboard</h1>
+    <p class="welcome-text">Welcome back, Rajesh<br>Keep up the good work with your rescue missions!</p>
+
+    <div id="volunteerProfile" class="profile-card">
+        <div class="profile-header">
+            <img src="https://via.placeholder.com/60" alt="Rajesh Kumar" class="avatar">
+            <div class="name-row">
+                <h2>Rajesh Kumar</h2>
+                <div class="stats-brief">
+                    <span style="color: #3d7eff;">★ 4.7</span>
+                    <span style="color: #ffcc00;">★★★★★</span>
+                </div>
+            </div>
+            <div class="cases-tag">32 Cases <i class="fas fa-chevron-right" style="font-size: 0.7rem;"></i></div>
+        </div>
+        <div class="location-bar">
+            <span><i class="fas fa-map-marker-alt"></i> City Center Volunteer</span>
+            <i class="fas fa-angle-double-right"></i>
+        </div>
+    </div>
+
+    <div class="stats-list">
+        <div class="stat-item yellow">
+            <div class="stat-label"><i class="fas fa-trophy" style="color:#d4a017"></i> Total Rescues</div>
+            <div class="stat-value">36</div>
+        </div>
+        <div class="stat-item green">
+            <div class="stat-label"><i class="far fa-clock" style="color:#2d6a4f"></i> Avg. Response</div>
+            <div class="stat-value">9 <span>mins</span></div>
+        </div>
+        <div class="stat-item blue">
+            <div class="stat-label"><i class="fas fa-thumbs-up" style="color:#3d7eff"></i> Success Rate</div>
+            <div class="stat-value">95%</div>
+        </div>
+    </div>
+
+    <div class="critical-card">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <span class="critical-badge">CRITICAL</span>
+                <span class="critical-title">Urgent case nearby!</span>
+            </div>
+            <i class="fas fa-chevron-right" style="color: #ccc;"></i>
+        </div>
+        <p class="distance">Injured dog reported 750m away</p>
+        <a href="vDashboard1.html" class="map-btn">
+            <i class="fab fa-telegram-plane"></i> View Case on Map
+        </a>
+    </div>
+</div>
+
+<script>
+    const openVolunteerProfile = document.getElementById('openVolunteerProfile');
+    const volunteerProfile = document.getElementById('volunteerProfile');
+
+    openVolunteerProfile.addEventListener('click', function () {
+        volunteerProfile.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        volunteerProfile.classList.add('focused');
+
+        setTimeout(function () {
+            volunteerProfile.classList.remove('focused');
+        }, 1200);
+    });
+</script>
+
+</body>
+</html>
