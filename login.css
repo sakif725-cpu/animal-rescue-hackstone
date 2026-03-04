@@ -9,10 +9,7 @@ body {
 	min-height: 100vh;
 	font-family: 'Inter', sans-serif;
 	color: #f4f7f8;
-	background-image: url('./login-bg.jpg');
-	background-size: cover;
-	background-position: center;
-	background-repeat: no-repeat;
+	background: radial-gradient(circle at top, #244452 0%, #0f1820 58%, #0b1218 100%);
 }
 
 .page-wrap {
