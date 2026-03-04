@@ -407,7 +407,15 @@
     </div>
 </div>
 
+<script src="assets/app-language.js"></script>
 <script>
+    function t(value) {
+        if (window.AppLanguage && typeof window.AppLanguage.t === 'function') {
+            return window.AppLanguage.t(value);
+        }
+        return value;
+    }
+
     const openVolunteerProfile = document.getElementById('openVolunteerProfile');
     const volunteerProfileModal = document.getElementById('volunteerProfileModal');
     const saveVolunteerProfile = document.getElementById('saveVolunteerProfile');
@@ -426,21 +434,21 @@
         const diffMs = Date.now() - submittedAt.getTime();
         const mins = Math.max(1, Math.floor(diffMs / 60000));
         if (mins < 60) {
-            return mins + ' mins ago';
+            return mins + ' ' + t('mins ago');
         }
         const hours = Math.floor(mins / 60);
-        return hours + ' hrs ago';
+        return hours + ' ' + t('hrs ago');
     }
 
     function renderReportsList(reports) {
         if (!reports.length) {
-            reportsSection.innerHTML = '<div class="reports-empty">No open injured-animal reports available</div>';
+            reportsSection.innerHTML = '<div class="reports-empty">' + t('No open injured-animal reports available') + '</div>';
             return;
         }
 
         reportsSection.innerHTML = reports.map(function (report) {
-            const address = report.address || 'Location unavailable';
-            const reporterName = report.reporterName || 'Reporter';
+            const address = report.address || t('Location unavailable');
+            const reporterName = report.reporterName || t('Reporter');
             const reportTime = formatMinutesAgo(report.submittedAt || new Date().toISOString());
             const lat = report.latitude || '';
             const lon = report.longitude || '';
@@ -450,15 +458,15 @@
 
             return '<article class="report-card">'
                 + '<div class="report-top">'
-                + '<span class="report-id">Case #' + (report.id || '0000') + '</span>'
+                + '<span class="report-id">' + t('Case #') + (report.id || '0000') + '</span>'
                 + '<span class="report-time">' + reportTime + '</span>'
                 + '</div>'
-                + '<div class="report-condition">' + (report.condition || 'Injured Animal') + '</div>'
-                + '<div class="report-meta"><strong>Reporter:</strong> ' + reporterName + '</div>'
-                + '<div class="report-meta"><strong>Location:</strong> ' + address + '</div>'
+                + '<div class="report-condition">' + (report.condition || t('Injured Animal')) + '</div>'
+                + '<div class="report-meta"><strong>' + t('Reporter:') + '</strong> ' + reporterName + '</div>'
+                + '<div class="report-meta"><strong>' + t('Location:') + '</strong> ' + address + '</div>'
                 + '<div class="report-actions">'
-                + '<a href="' + caseLink + '" class="report-btn report-btn-details">View Details</a>'
-                + '<a href="' + mapLink + '" target="_blank" class="report-btn report-btn-map">Navigate</a>'
+                + '<a href="' + caseLink + '" class="report-btn report-btn-details">' + t('View Details') + '</a>'
+                + '<a href="' + mapLink + '" target="_blank" class="report-btn report-btn-map">' + t('Navigate') + '</a>'
                 + '</div>'
                 + '</article>';
         }).join('');
@@ -479,7 +487,7 @@
             const data = await response.json();
             renderReportsList(data.reports || []);
         } catch (error) {
-            reportsSection.innerHTML = '<div class="reports-empty">Unable to load reports right now</div>';
+            reportsSection.innerHTML = '<div class="reports-empty">' + t('Unable to load reports right now') + '</div>';
         }
     }
 
@@ -507,22 +515,22 @@
             const summary = data.summary || {};
             const latest = summary.latestReport || null;
 
-            document.getElementById('welcomeText').textContent = 'Live data is synced from the server.';
+            document.getElementById('welcomeText').textContent = t('Live data is synced from the server.');
             document.getElementById('totalReportsValue').textContent = String(summary.totalReports || 0);
             document.getElementById('resolvedCasesValue').textContent = String(summary.resolvedReports || 0);
 
             if (summary.currentVolunteerCode) {
-                document.getElementById('welcomeText').textContent = 'Welcome ' + summary.currentVolunteerCode;
-                modalVolunteerId.textContent = 'Volunteer ID: ' + summary.currentVolunteerCode;
+                document.getElementById('welcomeText').textContent = t('Welcome') + ' ' + summary.currentVolunteerCode;
+                modalVolunteerId.textContent = t('Volunteer ID:') + ' ' + summary.currentVolunteerCode;
             }
 
             const demographics = summary.currentVolunteerDemographics || {};
             modalVolunteerGenderInput.value = demographics.gender || 'Not specified';
             modalVolunteerAgeGroupInput.value = demographics.ageGroup || 'Not specified';
             modalVolunteerAreaInput.value = demographics.area || '';
-            modalVolunteerMemberSince.textContent = 'Member Since: ' + (demographics.memberSince || 'Not available');
+            modalVolunteerMemberSince.textContent = t('Member Since:') + ' ' + (demographics.memberSince || t('Not available'));
         } catch (error) {
-            document.getElementById('welcomeText').textContent = 'Unable to load live server data right now.';
+            document.getElementById('welcomeText').textContent = t('Unable to load live server data right now.');
         }
     }
 
@@ -538,7 +546,7 @@
     });
 
     saveVolunteerProfile.addEventListener('click', async function () {
-        profileSaveStatus.textContent = 'Saving...';
+        profileSaveStatus.textContent = t('Saving...');
         profileSaveStatus.style.color = '#4b5563';
 
         try {
@@ -563,11 +571,11 @@
                 throw new Error('Save failed');
             }
 
-            profileSaveStatus.textContent = 'Saved successfully.';
+            profileSaveStatus.textContent = t('Saved successfully.');
             profileSaveStatus.style.color = '#15803d';
             loadDashboardSummary();
         } catch (error) {
-            profileSaveStatus.textContent = 'Could not save profile details.';
+            profileSaveStatus.textContent = t('Could not save profile details.');
             profileSaveStatus.style.color = '#b91c1c';
         }
     });

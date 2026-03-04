@@ -83,7 +83,15 @@
 
     </div>
 
+    <script src="assets/app-language.js"></script>
     <script>
+        function t(value) {
+            if (window.AppLanguage && typeof window.AppLanguage.t === 'function') {
+                return window.AppLanguage.t(value);
+            }
+            return value;
+        }
+
         const currentTabBtn = document.getElementById('currentTabBtn');
         const pastTabBtn = document.getElementById('pastTabBtn');
         let activeSection = 'current';
@@ -97,10 +105,10 @@
             const diffMs = Date.now() - submittedAt.getTime();
             const mins = Math.max(1, Math.floor(diffMs / 60000));
             if (mins < 60) {
-                return mins + ' mins';
+                return mins + ' ' + t('mins');
             }
             const hours = Math.floor(mins / 60);
-            return hours + ' hrs';
+            return hours + ' ' + t('hrs');
         }
 
         function formatClockTime(isoString) {
@@ -123,31 +131,31 @@
 
             const reportsContainer = document.getElementById('reportsContainer');
             if (!reports.length) {
-                reportsContainer.innerHTML = '<div class="empty-state">' + (section === 'past' ? 'No past reports available' : 'No current reports available') + '</div>';
+                reportsContainer.innerHTML = '<div class="empty-state">' + (section === 'past' ? t('No past reports available') : t('No current reports available')) + '</div>';
                 return;
             }
 
             reportsContainer.innerHTML = reports.map(function (report) {
                 const submittedAt = report.submittedAt || new Date().toISOString();
-                const shortAddress = (report.address || 'Unknown location').split(',').slice(0, 2).join(',').trim();
+                const shortAddress = (report.address || t('Unknown location')).split(',').slice(0, 2).join(',').trim();
                 const photo = report.photoData || 'https://i.pravatar.cc/300?img=11';
-                const statusTag = section === 'past' ? 'Resolved' : 'Open';
+                const statusTag = section === 'past' ? t('Resolved') : t('Open');
                 const statusColor = section === 'past' ? 'text-green-700 bg-green-50' : 'text-blue-700 bg-blue-50';
 
                 return '<article class="report-card">'
                     + '<div class="p-5">'
                     + '<div class="flex justify-between items-center mb-3">'
-                    + '<span class="text-xs font-bold text-gray-500 uppercase tracking-tight">Case ID #' + (report.id || '0000') + '</span>'
-                    + '<span class="text-xs font-semibold text-gray-400">' + formatMinutesAgo(submittedAt) + ' ago</span>'
+                    + '<span class="text-xs font-bold text-gray-500 uppercase tracking-tight">' + t('Case ID #') + (report.id || '0000') + '</span>'
+                    + '<span class="text-xs font-semibold text-gray-400">' + formatMinutesAgo(submittedAt) + ' ' + t('ago') + '</span>'
                     + '</div>'
                     + '<div class="flex items-center justify-between mb-3">'
-                    + '<h2 class="text-lg font-extrabold text-gray-800">Condition: ' + (report.condition || 'Injured') + '</h2>'
+                    + '<h2 class="text-lg font-extrabold text-gray-800">' + t('Condition:') + ' ' + (report.condition || t('Injured')) + '</h2>'
                     + '<span class="text-xs font-bold px-2 py-1 rounded-full ' + statusColor + '">' + statusTag + '</span>'
                     + '</div>'
-                    + '<p class="text-sm text-gray-600 mb-2"><i class="fas fa-location-dot text-blue-900 mr-2"></i>' + (shortAddress || 'Unknown location') + '</p>'
-                    + '<p class="text-xs text-gray-400">Updated at ' + formatClockTime(submittedAt) + '</p>'
+                    + '<p class="text-sm text-gray-600 mb-2"><i class="fas fa-location-dot text-blue-900 mr-2"></i>' + (shortAddress || t('Unknown location')) + '</p>'
+                    + '<p class="text-xs text-gray-400">' + t('Updated at') + ' ' + formatClockTime(submittedAt) + '</p>'
                     + '</div>'
-                    + '<img class="report-thumb" src="' + photo + '" alt="Reported animal photo">'
+                    + '<img class="report-thumb" src="' + photo + '" alt="' + t('Reported animal photo') + '">'
                     + '</article>';
             }).join('');
         }

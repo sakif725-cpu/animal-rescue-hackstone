@@ -363,7 +363,15 @@
     </div>
 </div>
 
+<script src="assets/app-language.js"></script>
 <script>
+    function t(value) {
+        if (window.AppLanguage && typeof window.AppLanguage.t === 'function') {
+            return window.AppLanguage.t(value);
+        }
+        return value;
+    }
+
     const backBtn = document.getElementById('backBtn');
     const addPhotosBtn = document.getElementById('addPhotosBtn');
     const photoInput = document.getElementById('photoInput');
@@ -387,7 +395,7 @@
 
         const zoomValue = zoomSlider.value;
         const mapEmbedUrl = 'https://maps.google.com/maps?q=' + currentLocation.latitude + ',' + currentLocation.longitude + '&z=' + zoomValue + '&output=embed';
-        mapPlaceholder.innerHTML = '<iframe title="Detected location map" src="' + mapEmbedUrl + '" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>';
+        mapPlaceholder.innerHTML = '<iframe title="' + t('Detected location map') + '" src="' + mapEmbedUrl + '" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>';
     }
 
     backBtn.addEventListener('click', function (event) {
@@ -422,8 +430,8 @@
             }
             selectedPhotoData = result;
             photoPreview.src = result;
-            photoPreview.alt = selectedFile.name || 'Selected injured animal photo';
-            addPhotosBtn.innerHTML = '<span>📷</span> Photo selected (' + photoInput.files.length + ')';
+            photoPreview.alt = selectedFile.name || t('Selected injured animal photo');
+            addPhotosBtn.innerHTML = '<span>📷</span> ' + t('Photo selected') + ' (' + photoInput.files.length + ')';
         };
         reader.readAsDataURL(selectedFile);
     });
@@ -441,7 +449,7 @@
         });
 
         if (!response.ok) {
-            throw new Error('Unable to fetch address details.');
+            throw new Error(t('Unable to fetch address details.'));
         }
 
         const data = await response.json();
@@ -450,11 +458,11 @@
 
     async function detectLocation() {
         if (!navigator.geolocation) {
-            setLocationError('Geolocation is not supported by this browser.');
+            setLocationError(t('Geolocation is not supported by this browser.'));
             return null;
         }
 
-        setLocationError('Detecting location...');
+        setLocationError(t('Detecting location...'));
 
         return new Promise(function (resolve) {
             navigator.geolocation.getCurrentPosition(
@@ -476,13 +484,13 @@
                         setLocationError('');
                     } catch (error) {
                         addressText.textContent = '📍 ' + latitude + ', ' + longitude;
-                        setLocationError('Location detected. Address lookup unavailable right now.');
+                        setLocationError(t('Location detected. Address lookup unavailable right now.'));
                     }
 
                     resolve(currentLocation);
                 },
                 function () {
-                    setLocationError('Unable to detect location. Please allow location access.');
+                    setLocationError(t('Unable to detect location. Please allow location access.'));
                     resolve(null);
                 },
                 {
@@ -513,7 +521,7 @@
 
     submitReportBtn.addEventListener('click', async function () {
         if (!selectedPhotoData) {
-            setLocationError('Please add at least one photo before submitting.');
+            setLocationError(t('Please add at least one photo before submitting.'));
             photoInput.click();
             return;
         }
@@ -523,13 +531,13 @@
         }
 
         if (!currentLocation) {
-            setLocationError('Location is required to submit. Please enable location access.');
+            setLocationError(t('Location is required to submit. Please enable location access.'));
             return;
         }
 
         submitReportBtn.disabled = true;
         submitReportBtn.style.opacity = '0.8';
-        submitReportBtn.textContent = 'Submitting report...';
+        submitReportBtn.textContent = t('Submitting report...');
 
         try {
             const response = await fetch('/api/reports', {
@@ -555,15 +563,15 @@
                 throw new Error('Failed to save report');
             }
         } catch (error) {
-            setLocationError('Could not submit report right now. Please try again.');
+            setLocationError(t('Could not submit report right now. Please try again.'));
             submitReportBtn.disabled = false;
             submitReportBtn.style.opacity = '1';
-            submitReportBtn.textContent = '⚠️ Submit Emergency Report';
+            submitReportBtn.textContent = t('⚠️ Submit Emergency Report');
             return;
         }
 
-        setLocationError('Report submitted successfully. Redirecting to tracking...');
-        submitReportBtn.textContent = 'Submitted ✓';
+        setLocationError(t('Report submitted successfully. Redirecting to tracking...'));
+        submitReportBtn.textContent = t('Submitted ✓');
 
         setTimeout(function () {
             window.location.href = 'track_updates.html';

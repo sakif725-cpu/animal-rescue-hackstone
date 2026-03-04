@@ -115,6 +115,14 @@
             white-space: nowrap;
             border: 0;
         }
+
+        .language-panel {
+            display: none;
+        }
+
+        .language-panel.is-open {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -123,7 +131,7 @@
         
         <div class="pt-12 pb-6 px-6 text-center profile-header relative">
             <a href="index.html" class="back-btn absolute left-4 top-10" id="backBtn" aria-label="Go back">←</a>
-            <h1 class="text-xl font-bold text-gray-800">Profile</h1>
+            <h1 id="profileTitle" class="text-xl font-bold text-gray-800">Profile</h1>
             
             <div class="mt-6 flex items-center gap-4 text-left">
                 <div class="relative">
@@ -144,25 +152,43 @@
             <ul class="divide-y divide-gray-100">
                 <li class="profile-item flex items-center gap-4 px-6 py-5 cursor-pointer">
                     <div class="w-10 text-center text-slate-500 text-xl"><i class="fas fa-shield-halved"></i></div>
-                    <span class="text-lg font-medium text-gray-700">My Reports</span>
+                    <span id="myReportsLabel" class="text-lg font-medium text-gray-700">My Reports</span>
                 </li>
                 <li class="profile-item flex items-center gap-4 px-6 py-5 cursor-pointer">
                     <div class="w-10 text-center text-slate-500 text-xl"><i class="fas fa-map-location-dot"></i></div>
-                    <span class="text-lg font-medium text-gray-700">Nearby NGOs</span>
+                    <span id="nearbyNgosLabel" class="text-lg font-medium text-gray-700">Nearby NGOs</span>
                 </li>
                 <li class="profile-item flex items-center gap-4 px-6 py-5 cursor-pointer">
                     <div class="w-10 text-center text-slate-500 text-xl flex items-center justify-center">
                         <img src="assets/volunter.png" alt="Volunteer" class="volunteer-logo w-9 h-9 object-contain">
                     </div>
-                    <span class="text-lg font-medium text-gray-700">Volunteer with Us</span>
+                    <span id="volunteerWithUsLabel" class="text-lg font-medium text-gray-700">Volunteer with Us</span>
                 </li>
-                <li class="profile-item flex items-center gap-4 px-6 py-5 cursor-pointer">
+                <li id="appLanguageItem" class="profile-item px-6 py-5">
+                    <button id="appLanguageToggle" type="button" class="w-full flex items-center gap-4 text-left" aria-expanded="false" aria-controls="appLanguagePanel">
                     <div class="w-10 text-center text-slate-500 text-xl"><i class="fas fa-language"></i></div>
-                    <span class="text-lg font-medium text-gray-700">App Language</span>
+                    <span id="appLanguageLabel" class="text-lg font-medium text-gray-700">App Language</span>
+                    <span id="appLanguageCurrent" class="ml-auto text-sm font-semibold text-slate-500">English</span>
+                    </button>
+                    <div id="appLanguagePanel" class="language-panel mt-4 pl-14">
+                        <div class="flex items-center gap-3">
+                            <select id="appLanguageSelect" class="flex-1 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-blue-100" aria-label="Select app language">
+                                <option value="en">English</option>
+                                <option value="hi">Hindi</option>
+                                <option value="bn">Bengali</option>
+                                <option value="ta">Tamil</option>
+                                <option value="te">Telugu</option>
+                                <option value="mr">Marathi</option>
+                                <option value="gu">Gujarati</option>
+                            </select>
+                            <button id="saveLanguageBtn" type="button" class="px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition">Save</button>
+                        </div>
+                        <p id="appLanguageMessage" class="text-xs text-gray-400 mt-2"></p>
+                    </div>
                 </li>
                 <li class="profile-item flex items-center gap-4 px-6 py-5 cursor-pointer">
                     <div class="w-10 text-center text-slate-500 text-xl"><i class="fas fa-question-circle"></i></div>
-                    <span class="text-lg font-medium text-gray-700">Help & FAQs</span>
+                    <span id="helpFaqLabel" class="text-lg font-medium text-gray-700">Help & FAQs</span>
                 </li>
             </ul>
         </nav>
@@ -170,21 +196,21 @@
         <div class="px-6 space-y-3 mb-8">
             <button class="primary-btn w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition">
                 <i class="fas fa-phone-alt"></i>
-                Emergency Call
+                <span id="emergencyCallLabel">Emergency Call</span>
             </button>
             <button id="logoutBtn" class="w-full border-2 border-gray-300 text-gray-500 py-3.5 rounded-2xl font-bold hover:bg-gray-50 transition">
-                Log Out
+                <span id="logoutLabel">Log Out</span>
             </button>
         </div>
 
         <div class="px-8 py-6 bg-gray-50/50">
-            <h3 class="font-black text-gray-900 mb-4 uppercase tracking-wider text-sm">Impact Stats</h3>
+            <h3 id="impactStatsLabel" class="font-black text-gray-900 mb-4 uppercase tracking-wider text-sm">Impact Stats</h3>
             <div class="grid grid-cols-2 gap-y-3 text-[15px]">
-                <div class="text-gray-700 font-medium">Reports Filed: <span id="reportsFiledValue" class="font-bold">0</span></div>
-                <div class="text-gray-700 font-medium">Resolved: <span id="resolvedValue" class="font-bold">0</span></div>
-                <div class="text-gray-700 font-medium">Open Cases: <span id="openCasesValue" class="font-bold">0</span></div>
-                <div class="text-gray-700 font-medium">Community: <span id="communityValue" class="font-bold">0</span></div>
-                <div class="col-span-2 text-gray-700 font-medium pt-1">Community Badges: <span id="badgesValue" class="font-bold text-blue-600">0</span></div>
+                <div class="text-gray-700 font-medium"><span id="reportsFiledLabel">Reports Filed:</span> <span id="reportsFiledValue" class="font-bold">0</span></div>
+                <div class="text-gray-700 font-medium"><span id="resolvedLabel">Resolved:</span> <span id="resolvedValue" class="font-bold">0</span></div>
+                <div class="text-gray-700 font-medium"><span id="openCasesLabel">Open Cases:</span> <span id="openCasesValue" class="font-bold">0</span></div>
+                <div class="text-gray-700 font-medium"><span id="communityLabel">Community:</span> <span id="communityValue" class="font-bold">0</span></div>
+                <div class="col-span-2 text-gray-700 font-medium pt-1"><span id="communityBadgesLabel">Community Badges:</span> <span id="badgesValue" class="font-bold text-blue-600">0</span></div>
             </div>
         </div>
 
@@ -197,6 +223,193 @@
         const avatarHint = document.getElementById('avatarHint');
         const defaultAvatarSrc = 'assets/profile.png';
         const logoutBtn = document.getElementById('logoutBtn');
+        const appLanguageToggle = document.getElementById('appLanguageToggle');
+        const appLanguagePanel = document.getElementById('appLanguagePanel');
+        const appLanguageSelect = document.getElementById('appLanguageSelect');
+        const appLanguageCurrent = document.getElementById('appLanguageCurrent');
+        const appLanguageMessage = document.getElementById('appLanguageMessage');
+        const saveLanguageBtn = document.getElementById('saveLanguageBtn');
+        const profileTitle = document.getElementById('profileTitle');
+        const myReportsLabel = document.getElementById('myReportsLabel');
+        const nearbyNgosLabel = document.getElementById('nearbyNgosLabel');
+        const volunteerWithUsLabel = document.getElementById('volunteerWithUsLabel');
+        const appLanguageLabel = document.getElementById('appLanguageLabel');
+        const helpFaqLabel = document.getElementById('helpFaqLabel');
+        const emergencyCallLabel = document.getElementById('emergencyCallLabel');
+        const logoutLabel = document.getElementById('logoutLabel');
+        const impactStatsLabel = document.getElementById('impactStatsLabel');
+        const reportsFiledLabel = document.getElementById('reportsFiledLabel');
+        const resolvedLabel = document.getElementById('resolvedLabel');
+        const openCasesLabel = document.getElementById('openCasesLabel');
+        const communityLabel = document.getElementById('communityLabel');
+        const communityBadgesLabel = document.getElementById('communityBadgesLabel');
+        const backBtn = document.getElementById('backBtn');
+        const avatarButton = document.getElementById('avatarButton');
+        const editAvatarButton = document.getElementById('editAvatarButton');
+
+        let avatarHintState = 'default';
+        let languageMessageState = 'none';
+        let profileNamePlaceholderKey = null;
+        let profilePhonePlaceholderKey = null;
+
+        const translations = {
+            en: {
+                pageTitle: 'User Profile',
+                profile: 'Profile',
+                myReports: 'My Reports',
+                nearbyNgos: 'Nearby NGOs',
+                volunteerWithUs: 'Volunteer with Us',
+                appLanguage: 'App Language',
+                helpFaq: 'Help & FAQs',
+                emergencyCall: 'Emergency Call',
+                logout: 'Log Out',
+                impactStats: 'Impact Stats',
+                reportsFiled: 'Reports Filed:',
+                resolved: 'Resolved:',
+                openCases: 'Open Cases:',
+                community: 'Community:',
+                communityBadges: 'Community Badges:',
+                editPhoto: 'Edit photo',
+                save: 'Save',
+                saving: 'Saving...',
+                chooseLanguage: 'Choose your preferred language and tap Save.',
+                languageSaved: 'Language saved successfully.',
+                languageSaveError: 'Could not update language right now.',
+                avatarUpdated: 'Profile photo updated.',
+                avatarDefault: 'Tap Edit photo to update details and photo.',
+                avatarError: 'Unable to load profile from server.',
+                userFallback: 'User',
+                phoneNotAdded: 'Phone not added',
+                phoneNotAvailable: 'Phone not available',
+                backAria: 'Go back',
+                editPhotoAria: 'Edit profile photo',
+                languageSelectAria: 'Select app language'
+            },
+            hi: {
+                pageTitle: 'यूज़र प्रोफ़ाइल', profile: 'प्रोफ़ाइल', myReports: 'मेरी रिपोर्ट्स', nearbyNgos: 'नज़दीकी NGO', volunteerWithUs: 'हमारे साथ वॉलंटियर बनें', appLanguage: 'ऐप भाषा', helpFaq: 'सहायता और FAQ', emergencyCall: 'आपातकालीन कॉल', logout: 'लॉग आउट', impactStats: 'प्रभाव आँकड़े', reportsFiled: 'दर्ज रिपोर्ट:', resolved: 'सुलझे:', openCases: 'खुले मामले:', community: 'समुदाय:', communityBadges: 'समुदाय बैज:', editPhoto: 'फोटो बदलें', save: 'सेव', saving: 'सेव हो रहा है...', chooseLanguage: 'अपनी भाषा चुनें और सेव दबाएँ।', languageSaved: 'भाषा सफलतापूर्वक सेव हुई।', languageSaveError: 'अभी भाषा अपडेट नहीं हो सकी।', avatarUpdated: 'प्रोफ़ाइल फोटो अपडेट हो गई।', avatarDefault: 'डिटेल्स और फोटो अपडेट करने के लिए Edit photo दबाएँ।', avatarError: 'सर्वर से प्रोफ़ाइल लोड नहीं हो सकी।', userFallback: 'यूज़र', phoneNotAdded: 'फोन नहीं जोड़ा गया', phoneNotAvailable: 'फोन उपलब्ध नहीं', backAria: 'वापस जाएँ', editPhotoAria: 'प्रोफ़ाइल फोटो संपादित करें', languageSelectAria: 'ऐप भाषा चुनें'
+            },
+            bn: {
+                pageTitle: 'ইউজার প্রোফাইল', profile: 'প্রোফাইল', myReports: 'আমার রিপোর্ট', nearbyNgos: 'কাছের NGO', volunteerWithUs: 'আমাদের সঙ্গে ভলান্টিয়ার হোন', appLanguage: 'অ্যাপ ভাষা', helpFaq: 'সহায়তা ও FAQ', emergencyCall: 'জরুরি কল', logout: 'লগ আউট', impactStats: 'প্রভাব পরিসংখ্যান', reportsFiled: 'দাখিল রিপোর্ট:', resolved: 'সমাধান:', openCases: 'খোলা কেস:', community: 'কমিউনিটি:', communityBadges: 'কমিউনিটি ব্যাজ:', editPhoto: 'ছবি সম্পাদনা', save: 'সেভ', saving: 'সেভ হচ্ছে...', chooseLanguage: 'পছন্দের ভাষা বেছে সেভ করুন।', languageSaved: 'ভাষা সফলভাবে সেভ হয়েছে।', languageSaveError: 'এখন ভাষা আপডেট করা যায়নি।', avatarUpdated: 'প্রোফাইল ছবি আপডেট হয়েছে।', avatarDefault: 'ডিটেইলস ও ছবি আপডেট করতে Edit photo চাপুন।', avatarError: 'সার্ভার থেকে প্রোফাইল লোড করা যায়নি।', userFallback: 'ইউজার', phoneNotAdded: 'ফোন যোগ করা হয়নি', phoneNotAvailable: 'ফোন উপলব্ধ নয়', backAria: 'ফিরে যান', editPhotoAria: 'প্রোফাইল ছবি সম্পাদনা', languageSelectAria: 'অ্যাপ ভাষা নির্বাচন করুন'
+            },
+            ta: {
+                pageTitle: 'பயனர் சுயவிவரம்', profile: 'சுயவிவரம்', myReports: 'என் அறிக்கைகள்', nearbyNgos: 'அருகிலுள்ள NGOகள்', volunteerWithUs: 'எங்களுடன் தன்னார்வலராக இணைக', appLanguage: 'செயலி மொழி', helpFaq: 'உதவி & கேள்விகள்', emergencyCall: 'அவசர அழைப்பு', logout: 'வெளியேறு', impactStats: 'தாக்கம் புள்ளிவிவரம்', reportsFiled: 'சமர்ப்பித்த அறிக்கைகள்:', resolved: 'தீர்க்கப்பட்டது:', openCases: 'திறந்த வழக்குகள்:', community: 'சமூகம்:', communityBadges: 'சமூக பதக்கங்கள்:', editPhoto: 'புகைப்படம் திருத்து', save: 'சேமிக்க', saving: 'சேமிக்கப்படுகிறது...', chooseLanguage: 'மொழியைத் தேர்ந்தெடுத்து சேமிக்கவும்.', languageSaved: 'மொழி வெற்றிகரமாக சேமிக்கப்பட்டது.', languageSaveError: 'மொழியை இப்போது புதுப்பிக்க முடியவில்லை.', avatarUpdated: 'சுயவிவரப் படம் புதுப்பிக்கப்பட்டது.', avatarDefault: 'விவரங்கள் மற்றும் புகைப்படத்தை புதுப்பிக்க Edit photo ஐ அழுத்தவும்.', avatarError: 'சர்வரில் இருந்து சுயவிவரத்தை ஏற்ற முடியவில்லை.', userFallback: 'பயனர்', phoneNotAdded: 'தொலைபேசி சேர்க்கப்படவில்லை', phoneNotAvailable: 'தொலைபேசி கிடைக்கவில்லை', backAria: 'பின் செல்', editPhotoAria: 'சுயவிவரப் புகைப்படத்தை திருத்து', languageSelectAria: 'செயலி மொழியைத் தேர்வுசெய்க'
+            },
+            te: {
+                pageTitle: 'యూజర్ ప్రొఫైల్', profile: 'ప్రొఫైల్', myReports: 'నా రిపోర్టులు', nearbyNgos: 'సమీప NGOలు', volunteerWithUs: 'మాతో వాలంటీర్ అవ్వండి', appLanguage: 'యాప్ భాష', helpFaq: 'సహాయం & FAQలు', emergencyCall: 'ఎమర్జెన్సీ కాల్', logout: 'లాగ్ అవుట్', impactStats: 'ప్రభావ గణాంకాలు', reportsFiled: 'దాఖలు చేసిన రిపోర్టులు:', resolved: 'పరిష్కరించబడినవి:', openCases: 'ఓపెన్ కేసులు:', community: 'సముదాయం:', communityBadges: 'సముదాయ బ్యాడ్జీలు:', editPhoto: 'ఫోటో సవరించు', save: 'సేవ్', saving: 'సేవ్ అవుతోంది...', chooseLanguage: 'మీకు నచ్చిన భాషను ఎంచుకుని సేవ్ నొక్కండి.', languageSaved: 'భాష విజయవంతంగా సేవ్ అయింది.', languageSaveError: 'ఇప్పుడు భాష అప్డేట్ చేయలేకపోయాం.', avatarUpdated: 'ప్రొఫైల్ ఫోటో అప్డేట్ అయింది.', avatarDefault: 'వివరాలు మరియు ఫోటో అప్డేట్ చేయడానికి Edit photo నొక్కండి.', avatarError: 'సర్వర్ నుంచి ప్రొఫైల్ లోడ్ కాలేదు.', userFallback: 'యూజర్', phoneNotAdded: 'ఫోన్ జోడించలేదు', phoneNotAvailable: 'ఫోన్ అందుబాటులో లేదు', backAria: 'వెనక్కి వెళ్లండి', editPhotoAria: 'ప్రొఫైల్ ఫోటోను సవరించు', languageSelectAria: 'యాప్ భాషను ఎంచుకోండి'
+            },
+            mr: {
+                pageTitle: 'वापरकर्ता प्रोफाइल', profile: 'प्रोफाइल', myReports: 'माझे अहवाल', nearbyNgos: 'जवळची NGO', volunteerWithUs: 'आमच्यासोबत स्वयंसेवक बना', appLanguage: 'ॲप भाषा', helpFaq: 'मदत आणि FAQ', emergencyCall: 'आपत्कालीन कॉल', logout: 'लॉग आउट', impactStats: 'प्रभाव आकडेवारी', reportsFiled: 'नोंदवलेले अहवाल:', resolved: 'निकाली:', openCases: 'उघडी प्रकरणे:', community: 'समुदाय:', communityBadges: 'समुदाय बॅजेस:', editPhoto: 'फोटो संपादित करा', save: 'सेव्ह', saving: 'सेव्ह होत आहे...', chooseLanguage: 'तुमची भाषा निवडा आणि सेव्ह करा.', languageSaved: 'भाषा यशस्वीपणे सेव्ह झाली.', languageSaveError: 'आत्ता भाषा अपडेट करता आली नाही.', avatarUpdated: 'प्रोफाइल फोटो अपडेट झाला.', avatarDefault: 'तपशील आणि फोटो अपडेट करण्यासाठी Edit photo वर टॅप करा.', avatarError: 'सर्व्हरवरून प्रोफाइल लोड झाले नाही.', userFallback: 'वापरकर्ता', phoneNotAdded: 'फोन जोडलेला नाही', phoneNotAvailable: 'फोन उपलब्ध नाही', backAria: 'मागे जा', editPhotoAria: 'प्रोफाइल फोटो संपादित करा', languageSelectAria: 'ॲप भाषा निवडा'
+            },
+            gu: {
+                pageTitle: 'યુઝર પ્રોફાઇલ', profile: 'પ્રોફાઇલ', myReports: 'મારા રિપોર્ટ્સ', nearbyNgos: 'નજીકના NGO', volunteerWithUs: 'અમારા સાથે વોલન્ટિયર બનો', appLanguage: 'એપ ભાષા', helpFaq: 'મદદ અને FAQ', emergencyCall: 'ઇમરજન્સી કૉલ', logout: 'લૉગ આઉટ', impactStats: 'અસર આંકડા', reportsFiled: 'ફાઇલ કરેલ રિપોર્ટ્સ:', resolved: 'ઉકેલાયેલ:', openCases: 'ખુલ્લા કેસ:', community: 'સમુદાય:', communityBadges: 'સમુદાય બેજ:', editPhoto: 'ફોટો સંપાદિત કરો', save: 'સેવ', saving: 'સેવ થઈ રહ્યું છે...', chooseLanguage: 'તમારી ભાષા પસંદ કરીને સેવ કરો.', languageSaved: 'ભાષા સફળતાપૂર્વક સેવ થઈ.', languageSaveError: 'હમણાં ભાષા અપડેટ થઈ શકી નથી.', avatarUpdated: 'પ્રોફાઇલ ફોટો અપડેટ થયો.', avatarDefault: 'વિગતો અને ફોટો અપડેટ કરવા Edit photo દબાવો.', avatarError: 'સર્વર પરથી પ્રોફાઇલ લોડ થઈ શકી નથી.', userFallback: 'યુઝર', phoneNotAdded: 'ફોન ઉમેરેલ નથી', phoneNotAvailable: 'ફોન ઉપલબ્ધ નથી', backAria: 'પાછા જાઓ', editPhotoAria: 'પ્રોફાઇલ ફોટો સંપાદિત કરો', languageSelectAria: 'એપ ભાષા પસંદ કરો'
+            }
+        };
+
+        const languageLabels = {
+            en: 'English',
+            hi: 'Hindi',
+            bn: 'Bengali',
+            ta: 'Tamil',
+            te: 'Telugu',
+            mr: 'Marathi',
+            gu: 'Gujarati'
+        };
+
+        let activeLanguageCode = 'en';
+
+        function languageName(code) {
+            return languageLabels[code] || languageLabels.en;
+        }
+
+        function t(key) {
+            const lang = translations[activeLanguageCode] || translations.en;
+            return lang[key] || translations.en[key] || '';
+        }
+
+        function renderAvatarHint() {
+            if (avatarHintState === 'updated') {
+                avatarHint.textContent = t('avatarUpdated');
+                avatarHint.className = 'text-xs text-green-600 mt-1';
+                return;
+            }
+            if (avatarHintState === 'error') {
+                avatarHint.textContent = t('avatarError');
+                avatarHint.className = 'text-xs text-red-500 mt-1';
+                return;
+            }
+            avatarHint.textContent = t('avatarDefault');
+            avatarHint.className = 'text-xs text-gray-400 mt-1';
+        }
+
+        function renderLanguageMessage() {
+            if (languageMessageState === 'chooser') {
+                appLanguageMessage.textContent = t('chooseLanguage');
+                appLanguageMessage.className = 'text-xs text-gray-400 mt-2';
+                return;
+            }
+            if (languageMessageState === 'saved') {
+                appLanguageMessage.textContent = t('languageSaved');
+                appLanguageMessage.className = 'text-xs text-green-600 mt-2';
+                return;
+            }
+            if (languageMessageState === 'error') {
+                appLanguageMessage.textContent = t('languageSaveError');
+                appLanguageMessage.className = 'text-xs text-red-500 mt-2';
+                return;
+            }
+            appLanguageMessage.textContent = '';
+            appLanguageMessage.className = 'text-xs text-gray-400 mt-2';
+        }
+
+        function applyTranslations() {
+            document.title = t('pageTitle');
+            profileTitle.textContent = t('profile');
+            myReportsLabel.textContent = t('myReports');
+            nearbyNgosLabel.textContent = t('nearbyNgos');
+            volunteerWithUsLabel.textContent = t('volunteerWithUs');
+            appLanguageLabel.textContent = t('appLanguage');
+            helpFaqLabel.textContent = t('helpFaq');
+            emergencyCallLabel.textContent = t('emergencyCall');
+            logoutLabel.textContent = t('logout');
+            impactStatsLabel.textContent = t('impactStats');
+            reportsFiledLabel.textContent = t('reportsFiled');
+            resolvedLabel.textContent = t('resolved');
+            openCasesLabel.textContent = t('openCases');
+            communityLabel.textContent = t('community');
+            communityBadgesLabel.textContent = t('communityBadges');
+            editAvatarButton.textContent = t('editPhoto');
+            saveLanguageBtn.textContent = saveLanguageBtn.disabled ? t('saving') : t('save');
+            backBtn.setAttribute('aria-label', t('backAria'));
+            avatarButton.setAttribute('aria-label', t('editPhotoAria'));
+            appLanguageSelect.setAttribute('aria-label', t('languageSelectAria'));
+            if (profileNamePlaceholderKey) {
+                profileName.textContent = t(profileNamePlaceholderKey);
+            }
+            if (profilePhonePlaceholderKey) {
+                profilePhone.textContent = t(profilePhonePlaceholderKey);
+            }
+            renderAvatarHint();
+            renderLanguageMessage();
+        }
+
+        function setLanguageUI(code) {
+            const selectedCode = languageLabels[code] ? code : 'en';
+            activeLanguageCode = selectedCode;
+            appLanguageSelect.value = selectedCode;
+            appLanguageCurrent.textContent = languageName(selectedCode);
+            document.documentElement.lang = selectedCode;
+            try {
+                window.localStorage.setItem('appLanguage', selectedCode);
+            } catch (error) {
+                // no-op
+            }
+            applyTranslations();
+        }
+
+        function setLanguageMessageState(state) {
+            languageMessageState = state;
+            renderLanguageMessage();
+        }
 
         async function loadProfileDetails() {
             try {
@@ -213,29 +426,91 @@
                 const data = await response.json();
                 const profile = data.profile || {};
 
-                profileName.textContent = profile.name || 'User';
-                profilePhone.textContent = profile.phone || 'Phone not added';
+                setLanguageUI((profile.appLanguage || 'en').toLowerCase());
+
+                if (profile.name) {
+                    profileName.textContent = profile.name;
+                    profileNamePlaceholderKey = null;
+                } else {
+                    profileNamePlaceholderKey = 'userFallback';
+                    profileName.textContent = t('userFallback');
+                }
+
+                if (profile.phone) {
+                    profilePhone.textContent = profile.phone;
+                    profilePhonePlaceholderKey = null;
+                } else {
+                    profilePhonePlaceholderKey = 'phoneNotAdded';
+                    profilePhone.textContent = t('phoneNotAdded');
+                }
 
                 if (profile.avatarData) {
                     avatarImage.src = profile.avatarData;
-                    avatarHint.textContent = 'Profile photo updated.';
-                    avatarHint.className = 'text-xs text-green-600 mt-1';
+                    avatarHintState = 'updated';
                 } else {
                     avatarImage.src = defaultAvatarSrc;
-                    avatarHint.textContent = 'Tap Edit photo to update details and photo.';
-                    avatarHint.className = 'text-xs text-gray-400 mt-1';
+                    avatarHintState = 'default';
                 }
+                renderAvatarHint();
             } catch (error) {
                 avatarImage.src = defaultAvatarSrc;
-                profileName.textContent = 'User';
-                profilePhone.textContent = 'Phone not available';
-                avatarHint.textContent = 'Unable to load profile from server.';
-                avatarHint.className = 'text-xs text-red-500 mt-1';
+                setLanguageUI('en');
+                profileNamePlaceholderKey = 'userFallback';
+                profileName.textContent = t('userFallback');
+                profilePhonePlaceholderKey = 'phoneNotAvailable';
+                profilePhone.textContent = t('phoneNotAvailable');
+                avatarHintState = 'error';
+                renderAvatarHint();
             }
         }
 
         logoutBtn.addEventListener('click', function () {
             window.location.href = '/logout';
+        });
+
+        appLanguageToggle.addEventListener('click', function () {
+            const isOpen = appLanguagePanel.classList.toggle('is-open');
+            appLanguageToggle.setAttribute('aria-expanded', String(isOpen));
+            if (isOpen) {
+                setLanguageMessageState('chooser');
+            } else {
+                setLanguageMessageState('none');
+            }
+        });
+
+        saveLanguageBtn.addEventListener('click', async function () {
+            const selectedLanguage = (appLanguageSelect.value || 'en').toLowerCase();
+
+            try {
+                saveLanguageBtn.disabled = true;
+                applyTranslations();
+
+                const updateResponse = await fetch('/api/profile/language', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ appLanguage: selectedLanguage })
+                });
+
+                if (updateResponse.status === 401) {
+                    window.location.href = '/login';
+                    return;
+                }
+
+                if (!updateResponse.ok) {
+                    throw new Error('Unable to save language');
+                }
+
+                setLanguageUI(selectedLanguage);
+                setLanguageMessageState('saved');
+            } catch (error) {
+                appLanguageSelect.value = activeLanguageCode;
+                setLanguageMessageState('error');
+            } finally {
+                saveLanguageBtn.disabled = false;
+                applyTranslations();
+            }
         });
 
         async function loadProfileStats() {

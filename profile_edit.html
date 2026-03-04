@@ -108,7 +108,15 @@
         </main>
     </div>
 
+    <script src="assets/app-language.js"></script>
     <script>
+        function t(value) {
+            if (window.AppLanguage && typeof window.AppLanguage.t === 'function') {
+                return window.AppLanguage.t(value);
+            }
+            return value;
+        }
+
         const defaultAvatarSrc = 'assets/profile.png';
         const maxAvatarSizeInBytes = 5 * 1024 * 1024;
         const allowedAvatarTypes = ['image/jpeg', 'image/png', 'image/webp'];
@@ -153,7 +161,7 @@
                 emailInput.value = '';
                 addressInput.value = '';
                 avatarPreview.src = defaultAvatarSrc;
-                avatarHint.textContent = 'Unable to load profile data from server.';
+                avatarHint.textContent = t('Unable to load profile data from server.');
                 avatarHint.className = 'text-xs text-red-500 mt-2';
             }
         }
@@ -171,14 +179,14 @@
             }
 
             if (!allowedAvatarTypes.includes(file.type)) {
-                avatarHint.textContent = 'Use JPG, PNG, or WEBP only.';
+                avatarHint.textContent = t('Use JPG, PNG, or WEBP only.');
                 avatarHint.className = 'text-xs text-red-500 mt-2';
                 avatarInput.value = '';
                 return;
             }
 
             if (file.size > maxAvatarSizeInBytes) {
-                avatarHint.textContent = 'Image is too large. Max size is 5MB.';
+                avatarHint.textContent = t('Image is too large. Max size is 5MB.');
                 avatarHint.className = 'text-xs text-red-500 mt-2';
                 avatarInput.value = '';
                 return;
@@ -192,7 +200,7 @@
                 }
                 pendingAvatarData = imageData;
                 avatarPreview.src = imageData;
-                avatarHint.textContent = 'Photo selected. Tap Save to apply.';
+                avatarHint.textContent = t('Photo selected. Tap Save to apply.');
                 avatarHint.className = 'text-xs text-green-600 mt-2';
             };
             reader.readAsDataURL(file);
@@ -225,12 +233,12 @@
                 }
 
                 if (!response.ok) {
-                    throw new Error('Failed to save profile');
+                    throw new Error(t('Failed to save profile'));
                 }
 
                 window.location.href = 'profile.html';
             } catch (error) {
-                avatarHint.textContent = 'Could not save profile right now. Please try again.';
+                avatarHint.textContent = t('Could not save profile right now. Please try again.');
                 avatarHint.className = 'text-xs text-red-500 mt-2';
             }
         });

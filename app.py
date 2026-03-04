@@ -73,6 +73,15 @@ class UserProfile(db.Model):
 	updated_at = db.Column(db.DateTime(timezone=True), nullable=False, default=current_time, onupdate=current_time)
 
 
+class UserPreference(db.Model):
+	__tablename__ = "user_preferences"
+
+	id = db.Column(db.Integer, primary_key=True)
+	user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, unique=True, index=True)
+	app_language = db.Column(db.String(16), nullable=False, default="en")
+	updated_at = db.Column(db.DateTime(timezone=True), nullable=False, default=current_time, onupdate=current_time)
+
+
 class Report(db.Model):
 	__tablename__ = "reports"
 
@@ -169,6 +178,15 @@ def get_or_create_volunteer_profile(volunteer: Volunteer) -> VolunteerProfile:
 		db.session.add(profile)
 		db.session.commit()
 	return profile
+
+
+def get_or_create_user_preference(user: User) -> UserPreference:
+	preference = UserPreference.query.filter_by(user_id=user.id).first()
+	if preference is None:
+		preference = UserPreference(user_id=user.id)
+		db.session.add(preference)
+		db.session.commit()
+	return preference
 
 
 def get_or_assign_latest_open_report_for_volunteer(volunteer: Volunteer):
@@ -315,6 +333,7 @@ def get_profile():
 		return unauthorized_json_response()
 
 	profile = get_or_create_user_profile(user)
+	preference = get_or_create_user_preference(user)
 
 	return jsonify(
 		{
@@ -324,6 +343,7 @@ def get_profile():
 				"email": profile.email or "",
 				"address": profile.address or "",
 				"avatarData": profile.avatar_data,
+				"appLanguage": preference.app_language or "en",
 			}
 		}
 	), 200
@@ -344,19 +364,26 @@ def update_profile():
 	email = str(payload.get("email") or "").strip()
 	address = str(payload.get("address") or "").strip()
 	avatar_data = payload.get("avatarData")
+	app_language = str(payload.get("appLanguage") or "").strip().lower()
+	allowed_languages = {"en", "hi", "bn", "ta", "te", "mr", "gu"}
 
 	if not name:
 		return jsonify({"error": "Name is required"}), 400
 	if not phone:
 		return jsonify({"error": "Phone is required"}), 400
+	if app_language and app_language not in allowed_languages:
+		return jsonify({"error": "Invalid app language"}), 400
 
 	profile = get_or_create_user_profile(user)
+	preference = get_or_create_user_preference(user)
 	profile.name = name
 	profile.phone = phone
 	profile.email = email
 	profile.address = address
 	if avatar_data is not None:
 		profile.avatar_data = str(avatar_data) if avatar_data else None
+	if app_language:
+		preference.app_language = app_language
 
 	db.session.commit()
 
@@ -368,9 +395,33 @@ def update_profile():
 				"email": profile.email,
 				"address": profile.address,
 				"avatarData": profile.avatar_data,
+				"appLanguage": preference.app_language or "en",
 			}
 		}
 	), 200
+
+
+@app.put("/api/profile/language")
+def update_profile_language():
+	if not is_authenticated():
+		return unauthorized_json_response()
+
+	user = User.query.get(session.get("user_id"))
+	if user is None:
+		return unauthorized_json_response()
+
+	payload = request.get_json(silent=True) or {}
+	app_language = str(payload.get("appLanguage") or "").strip().lower()
+	allowed_languages = {"en", "hi", "bn", "ta", "te", "mr", "gu"}
+
+	if app_language not in allowed_languages:
+		return jsonify({"error": "Invalid app language"}), 400
+
+	preference = get_or_create_user_preference(user)
+	preference.app_language = app_language
+	db.session.commit()
+
+	return jsonify({"appLanguage": preference.app_language}), 200
 
 
 @app.get("/api/profile/stats")

@@ -285,7 +285,15 @@
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
     crossorigin=""
 ></script>
+<script src="assets/app-language.js"></script>
 <script>
+    function t(value) {
+        if (window.AppLanguage && typeof window.AppLanguage.t === 'function') {
+            return window.AppLanguage.t(value);
+        }
+        return value;
+    }
+
     const backBtn = document.getElementById('backBtn');
     const caseTitle = document.getElementById('caseTitle');
     const caseDescription = document.getElementById('caseDescription');
@@ -391,7 +399,7 @@
         }
 
         destinationMarker = L.marker([destination.lat, destination.lon]).addTo(caseLeafletMap);
-        destinationMarker.bindPopup('Injured animal location').openPopup();
+        destinationMarker.bindPopup(t('Injured animal location')).openPopup();
         caseLeafletMap.setView([destination.lat, destination.lon], 15);
     }
 
@@ -429,12 +437,12 @@
             opacity: 0.9,
         }).addTo(caseLeafletMap);
 
-        volunteerMarker = L.marker([origin.lat, origin.lon]).addTo(caseLeafletMap).bindPopup('Your location');
+        volunteerMarker = L.marker([origin.lat, origin.lon]).addTo(caseLeafletMap).bindPopup(t('Your location'));
         if (destinationMarker) {
             caseLeafletMap.removeLayer(destinationMarker);
             destinationMarker = null;
         }
-        destinationMarker = L.marker([destination.lat, destination.lon]).addTo(caseLeafletMap).bindPopup('Injured animal');
+        destinationMarker = L.marker([destination.lat, destination.lon]).addTo(caseLeafletMap).bindPopup(t('Injured animal'));
 
         const bounds = L.latLngBounds(latLngs);
         caseLeafletMap.fitBounds(bounds.pad(0.15));
@@ -443,13 +451,13 @@
 
     async function renderMapPreview() {
         if (!latestReport) {
-            caseMap.textContent = 'Map preview will appear here';
+            caseMap.textContent = t('Map preview will appear here');
             return;
         }
 
         const destination = await getDestinationCoordinates();
         if (!destination) {
-            caseMap.textContent = 'Map location is unavailable for this case';
+            caseMap.textContent = t('Map location is unavailable for this case');
             return;
         }
 
@@ -469,7 +477,7 @@
             }
 
             if (!response.ok) {
-                throw new Error('Unable to load case details');
+                throw new Error(t('Unable to load case details'));
             }
 
             const data = await response.json();
@@ -479,42 +487,42 @@
                 return;
             }
 
-            caseTitle.textContent = (latestReport.condition || 'Injured Animal') + ' Case';
-            caseDescription.innerHTML = '<span style="color:var(--accent-blue)">ⓘ</span> Latest report from server database.';
-            reportLocation.textContent = '📍 ' + (latestReport.address || 'Location unavailable');
-            document.getElementById('reporterName').textContent = latestReport.reporterName || 'Reporter';
-            document.getElementById('reporterPhone').textContent = latestReport.reporterPhone || 'Phone unavailable';
+            caseTitle.textContent = (latestReport.condition || t('Injured Animal')) + ' ' + t('Case');
+            caseDescription.innerHTML = '<span style="color:var(--accent-blue)">ⓘ</span> ' + t('Latest report from server database.');
+            reportLocation.textContent = '📍 ' + (latestReport.address || t('Location unavailable'));
+            document.getElementById('reporterName').textContent = latestReport.reporterName || t('Reporter');
+            document.getElementById('reporterPhone').textContent = latestReport.reporterPhone || t('Phone unavailable');
             reporterAvatar.src = latestReport.reporterAvatarData || 'assets/profile.png';
             await renderMapPreview();
         } catch (error) {
-            caseDescription.innerHTML = '<span style="color:var(--accent-blue)">ⓘ</span> Could not load server case data.';
-            caseMap.textContent = 'Could not load map right now';
+            caseDescription.innerHTML = '<span style="color:var(--accent-blue)">ⓘ</span> ' + t('Could not load server case data.');
+            caseMap.textContent = t('Could not load map right now');
         }
     }
 
     loadLatestCase();
 
     callReporterBtn.addEventListener('click', function () {
-        alert('Reporter contact is not available in current dataset.');
+        alert(t('Reporter contact is not available in current dataset.'));
     });
 
     navigateBtn.addEventListener('click', function () {
         if (!latestReport) {
-            alert('Navigation is unavailable until case details are loaded.');
+            alert(t('Navigation is unavailable until case details are loaded.'));
             return;
         }
         navigateBtn.disabled = true;
-        navigateBtn.textContent = 'Routing...';
+        navigateBtn.textContent = t('Routing...');
 
         (async function () {
             try {
                 const destination = await getDestinationCoordinates();
                 if (!destination) {
-                    throw new Error('Destination unavailable');
+                    throw new Error(t('Destination unavailable'));
                 }
 
                 if (!navigator.geolocation) {
-                    throw new Error('Geolocation unavailable');
+                    throw new Error(t('Geolocation unavailable'));
                 }
 
                 navigator.geolocation.getCurrentPosition(
@@ -530,16 +538,16 @@
                             }
                             caseMap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                         } catch (error) {
-                            alert('Could not draw road route right now.');
+                            alert(t('Could not draw road route right now.'));
                         } finally {
                             navigateBtn.disabled = false;
-                            navigateBtn.textContent = '🚀 Navigate';
+                            navigateBtn.textContent = t('🚀 Navigate');
                         }
                     },
                     function () {
                         navigateBtn.disabled = false;
-                        navigateBtn.textContent = '🚀 Navigate';
-                        alert('Allow location access to create route from your location.');
+                        navigateBtn.textContent = t('🚀 Navigate');
+                        alert(t('Allow location access to create route from your location.'));
                     },
                     {
                         enableHighAccuracy: true,
@@ -549,20 +557,20 @@
                 );
             } catch (error) {
                 navigateBtn.disabled = false;
-                navigateBtn.textContent = '🚀 Navigate';
-                alert('Navigation is unavailable until location and map data are available.');
+                navigateBtn.textContent = t('🚀 Navigate');
+                alert(t('Navigation is unavailable until location and map data are available.'));
             }
         })();
     });
 
     completeBtn.addEventListener('click', async function () {
         if (!latestReport || !latestReport.id) {
-            alert('No active case is available to resolve.');
+            alert(t('No active case is available to resolve.'));
             return;
         }
 
         completeBtn.disabled = true;
-        completeBtn.textContent = 'Updating...';
+        completeBtn.textContent = t('Updating...');
 
         try {
             const response = await fetch('/api/reports/' + encodeURIComponent(latestReport.id) + '/resolve', {
@@ -575,18 +583,18 @@
             }
 
             if (!response.ok) {
-                throw new Error('Failed to resolve case');
+                throw new Error(t('Failed to resolve case'));
             }
 
-            completeBtn.textContent = '✓ Case Resolved';
-            caseDescription.innerHTML = '<span style="color:var(--accent-blue)">ⓘ</span> Case marked as resolved.';
+            completeBtn.textContent = t('✓ Case Resolved');
+            caseDescription.innerHTML = '<span style="color:var(--accent-blue)">ⓘ</span> ' + t('Case marked as resolved.');
             setTimeout(function () {
                 window.location.href = 'volunteer_dashboard.html';
             }, 700);
         } catch (error) {
             completeBtn.disabled = false;
-            completeBtn.textContent = '✓ Mark as Completed';
-            alert('Could not update case status right now.');
+            completeBtn.textContent = t('✓ Mark as Completed');
+            alert(t('Could not update case status right now.'));
         }
     });
 
