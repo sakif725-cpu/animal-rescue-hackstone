@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>User Profile</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -15,6 +15,11 @@
             --text-dark: #1f2937;
         }
 
+        html, body {
+            width: 100%;
+            min-height: 100%;
+        }
+
         body {
             font-family: 'Poppins', sans-serif;
             margin: 0;
@@ -25,6 +30,7 @@
             min-height: 100vh;
             min-height: 100dvh;
             -webkit-text-size-adjust: 100%;
+            overflow: auto;
         }
 
         .phone-container {
@@ -34,7 +40,9 @@
             height: 100dvh;
             background: #ffffff;
             box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
-            overflow: hidden;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
             display: flex;
             flex-direction: column;
         }
@@ -48,6 +56,23 @@
             .phone-container {
                 width: 100vw;
                 max-width: none;
+                box-shadow: none;
+                min-height: 100dvh;
+                height: 100dvh;
+            }
+        }
+
+        @media (orientation: landscape) and (max-height: 540px) {
+            body {
+                align-items: stretch;
+            }
+
+            .phone-container {
+                max-width: none;
+                width: 100vw;
+                min-height: 100dvh;
+                height: 100dvh;
+                border-radius: 0;
                 box-shadow: none;
             }
         }
