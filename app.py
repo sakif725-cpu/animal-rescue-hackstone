@@ -3,6 +3,7 @@ from pathlib import Path
 from datetime import datetime
 
 from flask import Flask, jsonify, redirect, request, send_from_directory, session, url_for
+from sqlalchemy import func
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -255,14 +256,14 @@ def index_page():
 @app.route("/volunteer-auth", methods=["GET", "POST"])
 def volunteer_auth_page():
 	if request.method == "POST":
-		action = (request.form.get("action") or "").strip().lower()
+		action = (request.form.get("action") or "login").strip().lower()
 		volunteer_code = (request.form.get("volunteer_id") or "").strip()
 		password = (request.form.get("password") or "").strip()
 
 		if not volunteer_code or not password:
 			return redirect(url_for("volunteer_auth_page"))
 
-		volunteer = Volunteer.query.filter_by(volunteer_code=volunteer_code).first()
+		volunteer = Volunteer.query.filter(func.lower(Volunteer.volunteer_code) == volunteer_code.lower()).first()
 
 		if action == "register":
 			if volunteer is None:
