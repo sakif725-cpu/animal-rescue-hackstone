@@ -531,21 +531,36 @@
         submitReportBtn.style.opacity = '0.8';
         submitReportBtn.textContent = 'Submitting report...';
 
-        const reportId = 'R' + String(Date.now()).slice(-6);
-        const report = {
-            id: reportId,
-            submittedAt: new Date().toISOString(),
-            condition: conditionSelect.value,
-            address: addressText.textContent.replace(/^📍\s*/, ''),
-            latitude: currentLocation.latitude,
-            longitude: currentLocation.longitude,
-            photoData: selectedPhotoData
-        };
+        try {
+            const response = await fetch('/api/reports', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    condition: conditionSelect.value,
+                    address: addressText.textContent.replace(/^📍\s*/, ''),
+                    latitude: currentLocation.latitude,
+                    longitude: currentLocation.longitude,
+                    photoData: selectedPhotoData
+                })
+            });
 
-        const reportsKey = 'animalRescue.reports';
-        const existingReports = JSON.parse(localStorage.getItem(reportsKey) || '[]');
-        existingReports.unshift(report);
-        localStorage.setItem(reportsKey, JSON.stringify(existingReports.slice(0, 50)));
+            if (response.status === 401) {
+                window.location.href = '/login';
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error('Failed to save report');
+            }
+        } catch (error) {
+            setLocationError('Could not submit report right now. Please try again.');
+            submitReportBtn.disabled = false;
+            submitReportBtn.style.opacity = '1';
+            submitReportBtn.textContent = '⚠️ Submit Emergency Report';
+            return;
+        }
 
         setLocationError('Report submitted successfully. Redirecting to tracking...');
         submitReportBtn.textContent = 'Submitted ✓';

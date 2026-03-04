@@ -172,7 +172,7 @@
                 <i class="fas fa-phone-alt"></i>
                 Emergency Call
             </button>
-            <button class="w-full border-2 border-gray-300 text-gray-500 py-3.5 rounded-2xl font-bold hover:bg-gray-50 transition">
+            <button id="logoutBtn" class="w-full border-2 border-gray-300 text-gray-500 py-3.5 rounded-2xl font-bold hover:bg-gray-50 transition">
                 Log Out
             </button>
         </div>
@@ -180,11 +180,11 @@
         <div class="px-8 py-6 bg-gray-50/50">
             <h3 class="font-black text-gray-900 mb-4 uppercase tracking-wider text-sm">Impact Stats</h3>
             <div class="grid grid-cols-2 gap-y-3 text-[15px]">
-                <div class="text-gray-700 font-medium">Reports Filed: <span class="font-bold">12</span></div>
-                <div class="text-gray-700 font-medium">Resolved: <span class="font-bold">9</span></div>
-                <div class="text-gray-700 font-medium">Resolved: <span class="font-bold">9</span></div>
-                <div class="text-gray-700 font-medium">Community: <span class="font-bold">0</span></div>
-                <div class="col-span-2 text-gray-700 font-medium pt-1">Community Badges: <span class="font-bold text-blue-600">3</span></div>
+                <div class="text-gray-700 font-medium">Reports Filed: <span id="reportsFiledValue" class="font-bold">0</span></div>
+                <div class="text-gray-700 font-medium">Resolved: <span id="resolvedValue" class="font-bold">0</span></div>
+                <div class="text-gray-700 font-medium">Open Cases: <span id="openCasesValue" class="font-bold">0</span></div>
+                <div class="text-gray-700 font-medium">Community: <span id="communityValue" class="font-bold">0</span></div>
+                <div class="col-span-2 text-gray-700 font-medium pt-1">Community Badges: <span id="badgesValue" class="font-bold text-blue-600">0</span></div>
             </div>
         </div>
 
@@ -195,35 +195,80 @@
         const profileName = document.getElementById('profileName');
         const profilePhone = document.getElementById('profilePhone');
         const avatarHint = document.getElementById('avatarHint');
-        const avatarStorageKey = 'animalRescue.profile.avatar';
-        const profileStorageKey = 'animalRescue.profile.details';
         const defaultAvatarSrc = 'assets/profile.png';
+        const logoutBtn = document.getElementById('logoutBtn');
 
-        const savedAvatar = localStorage.getItem(avatarStorageKey);
-        if (savedAvatar) {
-            avatarImage.src = savedAvatar;
-            avatarHint.textContent = 'Profile photo updated.';
-            avatarHint.className = 'text-xs text-green-600 mt-1';
-        } else {
-            avatarImage.src = defaultAvatarSrc;
-            avatarHint.textContent = 'Tap Edit photo to update details and photo.';
-            avatarHint.className = 'text-xs text-gray-400 mt-1';
-        }
-
-        const savedProfileRaw = localStorage.getItem(profileStorageKey);
-        if (savedProfileRaw) {
+        async function loadProfileDetails() {
             try {
-                const savedProfile = JSON.parse(savedProfileRaw);
-                if (savedProfile.name) {
-                    profileName.textContent = savedProfile.name;
+                const response = await fetch('/api/profile');
+                if (response.status === 401) {
+                    window.location.href = '/login';
+                    return;
                 }
-                if (savedProfile.phone) {
-                    profilePhone.textContent = savedProfile.phone;
+
+                if (!response.ok) {
+                    throw new Error('Failed to load profile');
+                }
+
+                const data = await response.json();
+                const profile = data.profile || {};
+
+                profileName.textContent = profile.name || 'User';
+                profilePhone.textContent = profile.phone || 'Phone not added';
+
+                if (profile.avatarData) {
+                    avatarImage.src = profile.avatarData;
+                    avatarHint.textContent = 'Profile photo updated.';
+                    avatarHint.className = 'text-xs text-green-600 mt-1';
+                } else {
+                    avatarImage.src = defaultAvatarSrc;
+                    avatarHint.textContent = 'Tap Edit photo to update details and photo.';
+                    avatarHint.className = 'text-xs text-gray-400 mt-1';
                 }
             } catch (error) {
-                localStorage.removeItem(profileStorageKey);
+                avatarImage.src = defaultAvatarSrc;
+                profileName.textContent = 'User';
+                profilePhone.textContent = 'Phone not available';
+                avatarHint.textContent = 'Unable to load profile from server.';
+                avatarHint.className = 'text-xs text-red-500 mt-1';
             }
         }
+
+        logoutBtn.addEventListener('click', function () {
+            window.location.href = '/logout';
+        });
+
+        async function loadProfileStats() {
+            try {
+                const response = await fetch('/api/profile/stats');
+                if (response.status === 401) {
+                    window.location.href = '/login';
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error('Failed to load profile stats');
+                }
+
+                const data = await response.json();
+                const summary = data.stats || {};
+
+                document.getElementById('reportsFiledValue').textContent = String(summary.totalReports || 0);
+                document.getElementById('resolvedValue').textContent = String(summary.resolvedReports || 0);
+                document.getElementById('openCasesValue').textContent = String(summary.openReports || 0);
+                document.getElementById('communityValue').textContent = String(summary.community || 0);
+                document.getElementById('badgesValue').textContent = String(summary.badges || 0);
+            } catch (error) {
+                document.getElementById('reportsFiledValue').textContent = '0';
+                document.getElementById('resolvedValue').textContent = '0';
+                document.getElementById('openCasesValue').textContent = '0';
+                document.getElementById('communityValue').textContent = '0';
+                document.getElementById('badgesValue').textContent = '0';
+            }
+        }
+
+        loadProfileDetails();
+        loadProfileStats();
 
     </script>
 </body>

@@ -181,6 +181,15 @@
 
         .btn-left { display: flex; align-items: center; gap: 15px; }
         .icon-circle { width: 35px; height: 35px; color: #475569; }
+        .list-arrow {
+            border-radius: 10px;
+            padding: 4px 8px;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        .list-arrow:hover {
+            background: #e63946;
+            color: #ffffff;
+        }
 
         .report-btn:hover,
         .report-btn:focus-visible,
@@ -200,8 +209,8 @@
 
         .list-btn:hover .icon-circle,
         .list-btn:focus-visible .icon-circle,
-        .list-btn:hover span:last-child,
-        .list-btn:focus-visible span:last-child {
+        .list-btn:hover .list-arrow,
+        .list-btn:focus-visible .list-arrow {
             color: #ffffff;
         }
 
@@ -286,15 +295,7 @@
                 <span class="icon-circle">🩸</span>
                 <span>Report Injured Animal</span>
             </div>
-            <span>&rsaquo;</span>
-        </a>
-
-        <a href="volunteer_dashboard.html" class="list-btn">
-            <div class="btn-left">
-                <span class="icon-circle">🤝</span>
-                <span>Volunteer</span>
-            </div>
-            <span>&rsaquo;</span>
+            <span class="list-arrow">&rsaquo;</span>
         </a>
 
         <a href="track_updates.html" class="list-btn">
@@ -302,7 +303,7 @@
                 <span class="icon-circle">📋</span>
                 <span>Track Reports</span>
             </div>
-            <span>&rsaquo;</span>
+            <span class="list-arrow">&rsaquo;</span>
         </a>
 
         <a href="#" class="list-btn">
@@ -310,7 +311,7 @@
                 <span class="icon-circle">📍</span>
                 <span>Nearby NGOs</span>
             </div>
-            <span>&rsaquo;</span>
+            <span class="list-arrow">&rsaquo;</span>
         </a>
     </div>
 

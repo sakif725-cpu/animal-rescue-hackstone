@@ -109,8 +109,6 @@
     </div>
 
     <script>
-        const avatarStorageKey = 'animalRescue.profile.avatar';
-        const profileStorageKey = 'animalRescue.profile.details';
         const defaultAvatarSrc = 'assets/profile.png';
         const maxAvatarSizeInBytes = 5 * 1024 * 1024;
         const allowedAvatarTypes = ['image/jpeg', 'image/png', 'image/webp'];
@@ -126,17 +124,41 @@
         const avatarHint = document.getElementById('editAvatarHint');
 
         let pendingAvatarData = null;
+        let currentAvatarData = null;
 
-        const savedAvatar = localStorage.getItem(avatarStorageKey);
-        avatarPreview.src = savedAvatar || defaultAvatarSrc;
+        async function loadProfileForEdit() {
+            try {
+                const response = await fetch('/api/profile');
+                if (response.status === 401) {
+                    window.location.href = '/login';
+                    return;
+                }
 
-        const savedProfileRaw = localStorage.getItem(profileStorageKey);
-        const savedProfile = savedProfileRaw ? JSON.parse(savedProfileRaw) : {};
+                if (!response.ok) {
+                    throw new Error('Failed to load profile');
+                }
 
-        nameInput.value = savedProfile.name || 'Sanjay';
-        phoneInput.value = savedProfile.phone || '+91 83206 43210';
-        emailInput.value = savedProfile.email || '';
-        addressInput.value = savedProfile.address || '';
+                const data = await response.json();
+                const profile = data.profile || {};
+
+                nameInput.value = profile.name || '';
+                phoneInput.value = profile.phone || '';
+                emailInput.value = profile.email || '';
+                addressInput.value = profile.address || '';
+                currentAvatarData = profile.avatarData || null;
+                avatarPreview.src = currentAvatarData || defaultAvatarSrc;
+            } catch (error) {
+                nameInput.value = '';
+                phoneInput.value = '';
+                emailInput.value = '';
+                addressInput.value = '';
+                avatarPreview.src = defaultAvatarSrc;
+                avatarHint.textContent = 'Unable to load profile data from server.';
+                avatarHint.className = 'text-xs text-red-500 mt-2';
+            }
+        }
+
+        loadProfileForEdit();
 
         choosePhotoBtn.addEventListener('click', function () {
             avatarInput.click();
@@ -177,23 +199,40 @@
             avatarInput.value = '';
         });
 
-        form.addEventListener('submit', function (event) {
+        form.addEventListener('submit', async function (event) {
             event.preventDefault();
 
-            const profileDetails = {
+            const payload = {
                 name: nameInput.value.trim(),
                 phone: phoneInput.value.trim(),
                 email: emailInput.value.trim(),
-                address: addressInput.value.trim()
+                address: addressInput.value.trim(),
+                avatarData: pendingAvatarData || currentAvatarData
             };
 
-            localStorage.setItem(profileStorageKey, JSON.stringify(profileDetails));
+            try {
+                const response = await fetch('/api/profile', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
 
-            if (pendingAvatarData) {
-                localStorage.setItem(avatarStorageKey, pendingAvatarData);
+                if (response.status === 401) {
+                    window.location.href = '/login';
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error('Failed to save profile');
+                }
+
+                window.location.href = 'profile.html';
+            } catch (error) {
+                avatarHint.textContent = 'Could not save profile right now. Please try again.';
+                avatarHint.className = 'text-xs text-red-500 mt-2';
             }
-
-            window.location.href = 'profile.html';
         });
     </script>
 </body>

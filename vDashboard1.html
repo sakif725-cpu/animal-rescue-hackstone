@@ -3,7 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Case Details UI</title>
+    <title>Case Details</title>
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""
+    >
     <style>
         :root {
             --primary-bg: #f8f9ff;
@@ -100,9 +106,26 @@
             width: 100%;
             height: 200px;
             background-color: #d1d8e0;
-            background-image: url('https://via.placeholder.com/400x200?text=Map+View'); /* Replace with real Map API */
-            background-size: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #5f6b7a;
+            font-size: 13px;
+            text-align: center;
+            overflow: hidden;
             position: relative;
+        }
+
+        .map-placeholder iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            display: block;
+        }
+
+        .map-placeholder .leaflet-container {
+            width: 100%;
+            height: 100%;
         }
 
         /* Content Section */
@@ -162,6 +185,7 @@
             height: 50px;
             border-radius: 50%;
             background: #eee;
+            object-fit: cover;
         }
 
         .user-details h4 { margin: 0; font-size: 16px; }
@@ -221,43 +245,350 @@
         <span>&times;</span>
     </div>
 
-    <div class="map-placeholder"></div>
+    <div class="map-placeholder" id="caseMap">Map preview will appear here</div>
 
     <div class="content">
         <div class="status-row">
-            <span class="badge-critical">Critical</span>
-            <span class="case-title">Injured Dog</span>
+            <span class="badge-critical" id="caseBadge">Critical</span>
+            <span class="case-title" id="caseTitle">No active case</span>
         </div>
 
-        <div class="description">
+        <div class="description" id="caseDescription">
             <span style="color:var(--accent-blue)">ⓘ</span> 
-            Hit by bike, bleeding from leg
+            Waiting for real case data from server.
         </div>
 
         <div class="reporter-card">
             <div class="user-info">
-                <div class="avatar"></div>
+                <img id="reporterAvatar" class="avatar" src="assets/profile.png" alt="Reporter profile photo">
                 <div class="user-details">
-                    <h4>Amit Sharma</h4>
-                    <p>+91 98765 43210</p>
+                    <h4 id="reporterName">Reporter</h4>
+                    <p id="reporterPhone">Phone unavailable</p>
                 </div>
             </div>
-            <div class="location-info">
-                📍 456 Elm Street, City Center
+            <div class="location-info" id="reportLocation">
+                📍 Location unavailable
             </div>
         </div>
 
         <div class="button-group">
-            <button class="btn btn-call">📞 Call Reporter</button>
-            <button class="btn btn-nav">🚀 Navigate</button>
+            <button class="btn btn-call" id="callReporterBtn">📞 Call Reporter</button>
+            <button class="btn btn-nav" id="navigateBtn">🚀 Navigate</button>
         </div>
 
-        <button class="btn btn-complete">✓ Mark as Completed</button>
+        <button class="btn btn-complete" id="completeBtn">✓ Mark as Completed</button>
     </div>
 </div>
 
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+></script>
 <script>
     const backBtn = document.getElementById('backBtn');
+    const caseTitle = document.getElementById('caseTitle');
+    const caseDescription = document.getElementById('caseDescription');
+    const reportLocation = document.getElementById('reportLocation');
+    const reporterAvatar = document.getElementById('reporterAvatar');
+    const caseMap = document.getElementById('caseMap');
+    const callReporterBtn = document.getElementById('callReporterBtn');
+    const navigateBtn = document.getElementById('navigateBtn');
+    const completeBtn = document.getElementById('completeBtn');
+    const queryParams = new URLSearchParams(window.location.search);
+    const selectedCaseId = queryParams.get('caseId');
+
+    let latestReport = null;
+    let caseLeafletMap = null;
+    let destinationMarker = null;
+    let volunteerMarker = null;
+    let routeLine = null;
+
+    function ensureCaseMap() {
+        if (caseLeafletMap || !window.L) {
+            return;
+        }
+
+        caseMap.textContent = '';
+        caseLeafletMap = L.map('caseMap', { zoomControl: false });
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(caseLeafletMap);
+        caseLeafletMap.setView([20.5937, 78.9629], 4);
+    }
+
+    function clearRouteLayers() {
+        if (!caseLeafletMap) {
+            return;
+        }
+
+        if (routeLine) {
+            caseLeafletMap.removeLayer(routeLine);
+            routeLine = null;
+        }
+
+        if (volunteerMarker) {
+            caseLeafletMap.removeLayer(volunteerMarker);
+            volunteerMarker = null;
+        }
+    }
+
+    function parseCoordinate(value) {
+        const number = parseFloat(value);
+        if (Number.isNaN(number)) {
+            return null;
+        }
+        return number;
+    }
+
+    async function geocodeAddress(address) {
+        if (!address) {
+            return null;
+        }
+
+        const response = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(address));
+        if (!response.ok) {
+            return null;
+        }
+
+        const results = await response.json();
+        if (!Array.isArray(results) || !results.length) {
+            return null;
+        }
+
+        return {
+            lat: parseFloat(results[0].lat),
+            lon: parseFloat(results[0].lon),
+        };
+    }
+
+    async function getDestinationCoordinates() {
+        if (!latestReport) {
+            return null;
+        }
+
+        const lat = parseCoordinate(latestReport.latitude);
+        const lon = parseCoordinate(latestReport.longitude);
+        if (lat !== null && lon !== null) {
+            return { lat: lat, lon: lon };
+        }
+
+        return geocodeAddress(latestReport.address || '');
+    }
+
+    function renderDestinationMarker(destination) {
+        ensureCaseMap();
+        if (!caseLeafletMap || !destination) {
+            return;
+        }
+
+        clearRouteLayers();
+
+        if (destinationMarker) {
+            caseLeafletMap.removeLayer(destinationMarker);
+            destinationMarker = null;
+        }
+
+        destinationMarker = L.marker([destination.lat, destination.lon]).addTo(caseLeafletMap);
+        destinationMarker.bindPopup('Injured animal location').openPopup();
+        caseLeafletMap.setView([destination.lat, destination.lon], 15);
+    }
+
+    async function drawRoadRoute(origin, destination) {
+        ensureCaseMap();
+        if (!caseLeafletMap) {
+            return false;
+        }
+
+        clearRouteLayers();
+
+        const osrmUrl = 'https://router.project-osrm.org/route/v1/driving/'
+            + origin.lon + ',' + origin.lat + ';'
+            + destination.lon + ',' + destination.lat
+            + '?overview=full&geometries=geojson';
+
+        const response = await fetch(osrmUrl);
+        if (!response.ok) {
+            return false;
+        }
+
+        const data = await response.json();
+        const route = data && data.routes && data.routes[0];
+        if (!route || !route.geometry || !Array.isArray(route.geometry.coordinates)) {
+            return false;
+        }
+
+        const latLngs = route.geometry.coordinates.map(function (coordinate) {
+            return [coordinate[1], coordinate[0]];
+        });
+
+        routeLine = L.polyline(latLngs, {
+            color: '#2563eb',
+            weight: 5,
+            opacity: 0.9,
+        }).addTo(caseLeafletMap);
+
+        volunteerMarker = L.marker([origin.lat, origin.lon]).addTo(caseLeafletMap).bindPopup('Your location');
+        if (destinationMarker) {
+            caseLeafletMap.removeLayer(destinationMarker);
+            destinationMarker = null;
+        }
+        destinationMarker = L.marker([destination.lat, destination.lon]).addTo(caseLeafletMap).bindPopup('Injured animal');
+
+        const bounds = L.latLngBounds(latLngs);
+        caseLeafletMap.fitBounds(bounds.pad(0.15));
+        return true;
+    }
+
+    async function renderMapPreview() {
+        if (!latestReport) {
+            caseMap.textContent = 'Map preview will appear here';
+            return;
+        }
+
+        const destination = await getDestinationCoordinates();
+        if (!destination) {
+            caseMap.textContent = 'Map location is unavailable for this case';
+            return;
+        }
+
+        renderDestinationMarker(destination);
+    }
+
+    async function loadLatestCase() {
+        try {
+            const apiUrl = selectedCaseId
+                ? ('/api/reports/' + encodeURIComponent(selectedCaseId))
+                : '/api/reports/latest';
+
+            const response = await fetch(apiUrl);
+            if (response.status === 401) {
+                window.location.href = '/volunteer-auth';
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error('Unable to load case details');
+            }
+
+            const data = await response.json();
+            latestReport = data.report;
+
+            if (!latestReport) {
+                return;
+            }
+
+            caseTitle.textContent = (latestReport.condition || 'Injured Animal') + ' Case';
+            caseDescription.innerHTML = '<span style="color:var(--accent-blue)">ⓘ</span> Latest report from server database.';
+            reportLocation.textContent = '📍 ' + (latestReport.address || 'Location unavailable');
+            document.getElementById('reporterName').textContent = latestReport.reporterName || 'Reporter';
+            document.getElementById('reporterPhone').textContent = latestReport.reporterPhone || 'Phone unavailable';
+            reporterAvatar.src = latestReport.reporterAvatarData || 'assets/profile.png';
+            await renderMapPreview();
+        } catch (error) {
+            caseDescription.innerHTML = '<span style="color:var(--accent-blue)">ⓘ</span> Could not load server case data.';
+            caseMap.textContent = 'Could not load map right now';
+        }
+    }
+
+    loadLatestCase();
+
+    callReporterBtn.addEventListener('click', function () {
+        alert('Reporter contact is not available in current dataset.');
+    });
+
+    navigateBtn.addEventListener('click', function () {
+        if (!latestReport) {
+            alert('Navigation is unavailable until case details are loaded.');
+            return;
+        }
+        navigateBtn.disabled = true;
+        navigateBtn.textContent = 'Routing...';
+
+        (async function () {
+            try {
+                const destination = await getDestinationCoordinates();
+                if (!destination) {
+                    throw new Error('Destination unavailable');
+                }
+
+                if (!navigator.geolocation) {
+                    throw new Error('Geolocation unavailable');
+                }
+
+                navigator.geolocation.getCurrentPosition(
+                    async function (position) {
+                        try {
+                            const origin = {
+                                lat: position.coords.latitude,
+                                lon: position.coords.longitude,
+                            };
+                            const routed = await drawRoadRoute(origin, destination);
+                            if (!routed) {
+                                throw new Error('Routing failed');
+                            }
+                            caseMap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        } catch (error) {
+                            alert('Could not draw road route right now.');
+                        } finally {
+                            navigateBtn.disabled = false;
+                            navigateBtn.textContent = '🚀 Navigate';
+                        }
+                    },
+                    function () {
+                        navigateBtn.disabled = false;
+                        navigateBtn.textContent = '🚀 Navigate';
+                        alert('Allow location access to create route from your location.');
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 8000,
+                        maximumAge: 0,
+                    }
+                );
+            } catch (error) {
+                navigateBtn.disabled = false;
+                navigateBtn.textContent = '🚀 Navigate';
+                alert('Navigation is unavailable until location and map data are available.');
+            }
+        })();
+    });
+
+    completeBtn.addEventListener('click', async function () {
+        if (!latestReport || !latestReport.id) {
+            alert('No active case is available to resolve.');
+            return;
+        }
+
+        completeBtn.disabled = true;
+        completeBtn.textContent = 'Updating...';
+
+        try {
+            const response = await fetch('/api/reports/' + encodeURIComponent(latestReport.id) + '/resolve', {
+                method: 'PATCH'
+            });
+
+            if (response.status === 401) {
+                window.location.href = '/volunteer-auth';
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error('Failed to resolve case');
+            }
+
+            completeBtn.textContent = '✓ Case Resolved';
+            caseDescription.innerHTML = '<span style="color:var(--accent-blue)">ⓘ</span> Case marked as resolved.';
+            setTimeout(function () {
+                window.location.href = 'volunteer_dashboard.html';
+            }, 700);
+        } catch (error) {
+            completeBtn.disabled = false;
+            completeBtn.textContent = '✓ Mark as Completed';
+            alert('Could not update case status right now.');
+        }
+    });
 
     backBtn.addEventListener('click', function (event) {
         if (window.history.length > 1) {

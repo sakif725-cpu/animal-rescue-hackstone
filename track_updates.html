@@ -29,6 +29,31 @@
             background-size: cover;
             background-position: center;
         }
+
+        .report-card {
+            background: #ffffff;
+            border: 2px solid #cbd5e1;
+            border-radius: 1.25rem;
+            overflow: hidden;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+        }
+
+        .report-thumb {
+            width: 100%;
+            height: 170px;
+            object-fit: cover;
+            display: block;
+            background: #eff6ff;
+        }
+
+        .empty-state {
+            border: 1px dashed #cbd5e1;
+            border-radius: 1rem;
+            padding: 24px;
+            text-align: center;
+            color: #64748b;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body class="bg-gray-50 flex justify-center min-h-screen">
@@ -50,70 +75,23 @@
         </div>
 
         <div class="px-6 flex gap-3 mb-8">
-            <button class="flex-1 py-3 bg-gray-100 text-gray-500 font-bold rounded-xl hover:bg-blue-600 hover:text-white hover:shadow-md hover:shadow-blue-200 transition">Current</button>
-            <button class="flex-1 py-3 bg-gray-100 text-gray-500 font-bold rounded-xl hover:bg-blue-600 hover:text-white hover:shadow-md hover:shadow-blue-200 transition">Past</button>
+            <button id="currentTabBtn" class="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-md shadow-blue-200 transition">Current</button>
+            <button id="pastTabBtn" class="flex-1 py-3 bg-gray-100 text-gray-500 font-bold rounded-xl hover:bg-blue-600 hover:text-white hover:shadow-md hover:shadow-blue-200 transition">Past</button>
         </div>
 
-        <div class="mx-6 bg-white rounded-[2rem] border border-gray-100 shadow-xl shadow-gray-200/50 overflow-hidden">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <div class="flex items-center gap-2 px-3 py-1 bg-green-50 rounded-full">
-                        <i class="fas fa-check-circle text-green-500 text-xs"></i>
-                        <span id="caseIdText" class="text-xs font-bold text-gray-500 uppercase tracking-tight">Case ID #2904</span>
-                    </div>
-                    <span id="caseAgeText" class="text-xs font-semibold text-gray-400">5 mins</span>
-                </div>
-                
-                <div class="flex items-center gap-4 mb-6">
-                    <div class="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center text-white shadow-lg shadow-green-100">
-                        <i class="fas fa-eye text-xl"></i>
-                    </div>
-                    <h2 id="caseTitleText" class="text-2xl font-extrabold text-gray-800 leading-tight">Help is on the way</h2>
-                </div>
-
-                <div class="flex justify-between items-center">
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-location-dot text-blue-900 text-lg"></i>
-                        <span id="caseLocationText" class="font-bold text-gray-700">City Center</span>
-                    </div>
-                    <span id="caseUpdatedText" class="text-xs font-medium text-gray-400">3 mins ago</span>
-                </div>
-            </div>
-
-            <div class="h-48 bg-blue-50 relative map-bg border-t border-gray-50">
-                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                    <div class="relative">
-                        <div class="w-14 h-14 rounded-full border-[3px] border-white shadow-xl overflow-hidden bg-white">
-                            <img id="casePhotoPreview" src="https://i.pravatar.cc/100?img=11" alt="Reported animal preview">
-                        </div>
-                        <div class="absolute -bottom-1 right-0 w-5 h-5 bg-green-500 border-2 border-white rounded-full flex items-center justify-center">
-                            <i class="fas fa-shield text-[8px] text-white"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="px-10 mt-8 space-y-6">
-            <div class="relative border-l-2 border-gray-100 pl-6 py-1">
-                <div class="absolute -left-[9px] top-2 w-4 h-4 bg-white border-2 border-gray-200 rounded-full"></div>
-                <p class="text-[15px] text-gray-600 leading-relaxed">
-                    <span class="font-bold text-gray-900" id="timelineActorText">Volunteer John</span> <span id="timelineText">accepted the case.</span>
-                </p>
-                <span id="timelineTimeText" class="text-xs font-bold text-gray-300 mt-1 block">5:13 AM</span>
-            </div>
-        </div>
-
-        <div class="mt-auto p-6">
-            <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-lg shadow-blue-100 transition-all active:scale-[0.98]">
-                <i class="fas fa-briefcase"></i>
-                Track Updates
-            </button>
-        </div>
+        <div id="reportsContainer" class="mx-6 space-y-6"></div>
 
     </div>
 
     <script>
+        const currentTabBtn = document.getElementById('currentTabBtn');
+        const pastTabBtn = document.getElementById('pastTabBtn');
+        let activeSection = 'current';
+        let reportSections = {
+            current: [],
+            past: []
+        };
+
         function formatMinutesAgo(isoString) {
             const submittedAt = new Date(isoString);
             const diffMs = Date.now() - submittedAt.getTime();
@@ -130,30 +108,85 @@
             return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         }
 
-        function applyLatestReport() {
-            const reports = JSON.parse(localStorage.getItem('animalRescue.reports') || '[]');
-            if (!reports.length) {
-                return;
-            }
-
-            const latest = reports[0];
-            const shortAddress = (latest.address || 'Unknown location').split(',').slice(0, 2).join(',').trim();
-
-            document.getElementById('caseIdText').textContent = 'Case ID #' + (latest.id || '0000');
-            document.getElementById('caseAgeText').textContent = formatMinutesAgo(latest.submittedAt || new Date().toISOString());
-            document.getElementById('caseUpdatedText').textContent = formatMinutesAgo(latest.submittedAt || new Date().toISOString()) + ' ago';
-            document.getElementById('caseTitleText').textContent = 'Condition: ' + (latest.condition || 'Injured');
-            document.getElementById('caseLocationText').textContent = shortAddress || 'Unknown location';
-            document.getElementById('timelineActorText').textContent = 'Dispatch Team';
-            document.getElementById('timelineText').textContent = 'received your report.';
-            document.getElementById('timelineTimeText').textContent = formatClockTime(latest.submittedAt || new Date().toISOString());
-
-            if (latest.photoData) {
-                document.getElementById('casePhotoPreview').src = latest.photoData;
+        function setTabState(section) {
+            if (section === 'current') {
+                currentTabBtn.className = 'flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-md shadow-blue-200 transition';
+                pastTabBtn.className = 'flex-1 py-3 bg-gray-100 text-gray-500 font-bold rounded-xl hover:bg-blue-600 hover:text-white hover:shadow-md hover:shadow-blue-200 transition';
+            } else {
+                pastTabBtn.className = 'flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-md shadow-blue-200 transition';
+                currentTabBtn.className = 'flex-1 py-3 bg-gray-100 text-gray-500 font-bold rounded-xl hover:bg-blue-600 hover:text-white hover:shadow-md hover:shadow-blue-200 transition';
             }
         }
 
-        applyLatestReport();
+        function renderSection(section) {
+            const reports = reportSections[section] || [];
+
+            const reportsContainer = document.getElementById('reportsContainer');
+            if (!reports.length) {
+                reportsContainer.innerHTML = '<div class="empty-state">' + (section === 'past' ? 'No past reports available' : 'No current reports available') + '</div>';
+                return;
+            }
+
+            reportsContainer.innerHTML = reports.map(function (report) {
+                const submittedAt = report.submittedAt || new Date().toISOString();
+                const shortAddress = (report.address || 'Unknown location').split(',').slice(0, 2).join(',').trim();
+                const photo = report.photoData || 'https://i.pravatar.cc/300?img=11';
+                const statusTag = section === 'past' ? 'Resolved' : 'Open';
+                const statusColor = section === 'past' ? 'text-green-700 bg-green-50' : 'text-blue-700 bg-blue-50';
+
+                return '<article class="report-card">'
+                    + '<div class="p-5">'
+                    + '<div class="flex justify-between items-center mb-3">'
+                    + '<span class="text-xs font-bold text-gray-500 uppercase tracking-tight">Case ID #' + (report.id || '0000') + '</span>'
+                    + '<span class="text-xs font-semibold text-gray-400">' + formatMinutesAgo(submittedAt) + ' ago</span>'
+                    + '</div>'
+                    + '<div class="flex items-center justify-between mb-3">'
+                    + '<h2 class="text-lg font-extrabold text-gray-800">Condition: ' + (report.condition || 'Injured') + '</h2>'
+                    + '<span class="text-xs font-bold px-2 py-1 rounded-full ' + statusColor + '">' + statusTag + '</span>'
+                    + '</div>'
+                    + '<p class="text-sm text-gray-600 mb-2"><i class="fas fa-location-dot text-blue-900 mr-2"></i>' + (shortAddress || 'Unknown location') + '</p>'
+                    + '<p class="text-xs text-gray-400">Updated at ' + formatClockTime(submittedAt) + '</p>'
+                    + '</div>'
+                    + '<img class="report-thumb" src="' + photo + '" alt="Reported animal photo">'
+                    + '</article>';
+            }).join('');
+        }
+
+        async function loadReportSections() {
+            try {
+                const response = await fetch('/api/reports/sections');
+                if (response.status === 401) {
+                    window.location.href = '/login';
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error('Failed to load sections');
+                }
+
+                const data = await response.json();
+                reportSections.current = data.current || [];
+                reportSections.past = data.past || [];
+                renderSection(activeSection);
+            } catch (error) {
+                renderSection(activeSection);
+            }
+        }
+
+        currentTabBtn.addEventListener('click', function () {
+            activeSection = 'current';
+            setTabState(activeSection);
+            renderSection(activeSection);
+        });
+
+        pastTabBtn.addEventListener('click', function () {
+            activeSection = 'past';
+            setTabState(activeSection);
+            renderSection(activeSection);
+        });
+
+        setTabState(activeSection);
+        loadReportSections();
 
         function goBack() {
             if (window.history.length > 1) {
