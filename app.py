@@ -327,28 +327,50 @@ def root():
 @app.route("/login", methods=["GET", "POST"])
 def login_page():
 	if request.method == "POST":
+		action = (request.form.get("action") or "login").strip().lower()
 		username = (request.form.get("username") or "").strip()
 		password = (request.form.get("password") or "").strip()
+		error = None
 
 		if not username or not password:
-			return redirect(url_for("login_page"))
+			error = "Username and password are required."
+		else:
+			user = User.query.filter_by(username=username).first()
+			if action == "register":
+				if user is not None:
+					error = "User already exists. Please log in."
+				else:
+					user = User(
+						username=username,
+						password_hash=generate_password_hash(password),
+					)
+					db.session.add(user)
+					db.session.commit()
+					get_or_create_user_profile(user)
+					session["user_id"] = user.id
+					session["username"] = user.username
+					return redirect(url_for("index_page"))
+			elif action == "login":
+				if user is None or not check_password_hash(user.password_hash, password):
+					error = "Invalid username or password."
+				else:
+					get_or_create_user_profile(user)
+					session["user_id"] = user.id
+					session["username"] = user.username
+					return redirect(url_for("index_page"))
+			else:
+				error = "Invalid action."
 
-		user = User.query.filter_by(username=username).first()
-
-		if user is None:
-			user = User(
-				username=username,
-				password_hash=generate_password_hash(password),
+		# Render login.html with error message if present
+		from flask import render_template_string
+		with open(BASE_DIR / "login.html", encoding="utf-8") as f:
+			html = f.read()
+		if error:
+			html = html.replace(
+				'<h1 class="title">Animals do have a Soul</h1>',
+				'<h1 class="title">Animals do have a Soul</h1><div class="error-message" style="color:red;text-align:center;margin-bottom:10px;">'+error+'</div>'
 			)
-			db.session.add(user)
-			db.session.commit()
-		elif not check_password_hash(user.password_hash, password):
-			return redirect(url_for("login_page"))
-
-		get_or_create_user_profile(user)
-		session["user_id"] = user.id
-		session["username"] = user.username
-		return redirect(url_for("index_page"))
+		return render_template_string(html)
 
 	return send_from_directory(BASE_DIR, "login.html")
 

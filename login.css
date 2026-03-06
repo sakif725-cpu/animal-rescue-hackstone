@@ -1,3 +1,15 @@
+/* User actions section for consistent button visibility and spacing */
+.user-actions {
+	display: grid;
+	gap: 10px;
+	margin-top: 4px;
+}
+
+.volunteer-actions {
+	display: grid;
+	gap: 10px;
+	margin-top: 4px;
+}
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 * {

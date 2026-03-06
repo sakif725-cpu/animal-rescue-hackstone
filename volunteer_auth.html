@@ -57,32 +57,32 @@
 			<h1 class="title">Volunteer Portal</h1>
 			<p class="subtitle">Enter Volunteer ID and password, or register as a new volunteer.</p>
 
-			<form class="login-form" action="/volunteer-auth" method="post">
-				<label class="input-group" for="volunteerId">
-					<span class="input-icon" aria-hidden="true">
-						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/>
-							<path d="M4 20C4 16.6863 7.58172 14 12 14C16.4183 14 20 16.6863 20 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-						</svg>
-					</span>
-					<input type="text" id="volunteerId" name="volunteer_id" placeholder="Volunteer ID" required>
-				</label>
+						<form id="volunteerForm" class="login-form auth-panel" action="/volunteer-auth" method="post">
+							<label class="input-group" for="volunteerId">
+								<span class="input-icon" aria-hidden="true">
+									<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+										<circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/>
+										<path d="M4 20C4 16.6863 7.58172 14 12 14C16.4183 14 20 16.6863 20 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+									</svg>
+								</span>
+								<input type="text" id="volunteerId" name="volunteer_id" placeholder="Volunteer ID" required>
+							</label>
 
-				<label class="input-group" for="volunteerPassword">
-					<span class="input-icon" aria-hidden="true">
-						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/>
-							<path d="M8 10V7.5C8 5.01472 10.0147 3 12.5 3C14.9853 3 17 5.01472 17 7.5V10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-						</svg>
-					</span>
-					<input type="password" id="volunteerPassword" name="password" placeholder="Password" required>
-				</label>
+							<label class="input-group" for="volunteerPassword">
+								<span class="input-icon" aria-hidden="true">
+									<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+										<rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/>
+										<path d="M8 10V7.5C8 5.01472 10.0147 3 12.5 3C14.9853 3 17 5.01472 17 7.5V10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+									</svg>
+								</span>
+								<input type="password" id="volunteerPassword" name="password" placeholder="Password" required>
+							</label>
 
-				<div class="auth-actions">
-					<button type="submit" name="action" value="login" class="login-btn">Log In as Volunteer</button>
-					<button type="submit" name="action" value="register" class="secondary-btn">Register as Volunteer</button>
-				</div>
-			</form>
+							<div class="volunteer-actions">
+								<button type="submit" name="action" value="login" class="login-btn">Volunteer Login</button>
+								<button type="submit" name="action" value="register" class="secondary-btn">Register as Volunteer</button>
+							</div>
+						</form>
 		</section>
 	</main>
 	<script src="assets/app-language.js"></script>
