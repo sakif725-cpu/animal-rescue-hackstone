@@ -143,8 +143,25 @@ def serialize_report(report: Report) -> dict:
 	}
 
 
+
 with app.app_context():
 	db.create_all()
+	# Always ensure default user exists and has password '1234'
+	default_username = "user"
+	default_password = "1234"
+	user = User.query.filter_by(username=default_username).first()
+	from werkzeug.security import generate_password_hash
+	if user is None:
+		user = User(
+			username=default_username,
+			password_hash=generate_password_hash(default_password),
+		)
+		db.session.add(user)
+		db.session.commit()
+		get_or_create_user_profile(user)
+	else:
+		user.password_hash = generate_password_hash(default_password)
+		db.session.commit()
 
 
 def is_authenticated() -> bool:
