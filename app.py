@@ -144,6 +144,78 @@ def serialize_report(report: Report) -> dict:
 
 
 
+# Move all model and helper function definitions above this block
+
+# ...existing code...
+
+def is_authenticated() -> bool:
+	return bool(session.get("user_id"))
+
+def is_volunteer_authenticated() -> bool:
+	return bool(session.get("volunteer_id"))
+
+def unauthorized_json_response():
+	return jsonify({"error": "Unauthorized"}), 401
+
+def get_or_create_user_profile(user: User) -> 'UserProfile':
+	profile = UserProfile.query.filter_by(user_id=user.id).first()
+	if profile is None:
+		profile = UserProfile(
+			user_id=user.id,
+			name=user.username,
+		)
+		db.session.add(profile)
+		db.session.commit()
+	return profile
+
+def get_or_create_volunteer_profile(volunteer: Volunteer) -> 'VolunteerProfile':
+	profile = VolunteerProfile.query.filter_by(volunteer_id=volunteer.id).first()
+	if profile is None:
+		profile = VolunteerProfile(volunteer_id=volunteer.id)
+		db.session.add(profile)
+		db.session.commit()
+	return profile
+
+def get_or_create_user_preference(user: User) -> 'UserPreference':
+	preference = UserPreference.query.filter_by(user_id=user.id).first()
+	if preference is None:
+		preference = UserPreference(user_id=user.id)
+		db.session.add(preference)
+		db.session.commit()
+	return preference
+
+def get_or_assign_latest_open_report_for_volunteer(volunteer: Volunteer):
+	assigned_open_report = (
+		db.session.query(Report)
+		.join(VolunteerCaseAssignment, VolunteerCaseAssignment.report_id == Report.id)
+		.filter(
+			VolunteerCaseAssignment.volunteer_id == volunteer.id,
+			Report.status == "open",
+		)
+		.order_by(Report.created_at.desc())
+		.first()
+	)
+	if assigned_open_report:
+		return assigned_open_report
+	unassigned_open_report = (
+		db.session.query(Report)
+		.outerjoin(VolunteerCaseAssignment, VolunteerCaseAssignment.report_id == Report.id)
+		.filter(
+			Report.status == "open",
+			VolunteerCaseAssignment.id.is_(None),
+		)
+		.order_by(Report.created_at.desc())
+		.first()
+	)
+	if unassigned_open_report:
+		assignment = VolunteerCaseAssignment(
+			report_id=unassigned_open_report.id,
+			volunteer_id=volunteer.id,
+		)
+		db.session.add(assignment)
+		db.session.commit()
+	return unassigned_open_report
+
 with app.app_context():
 	db.create_all()
 	# Always ensure default user exists and has password '1234'
@@ -294,37 +366,50 @@ def volunteer_auth_page():
 		action = (request.form.get("action") or "login").strip().lower()
 		volunteer_code = (request.form.get("volunteer_id") or "").strip()
 		password = (request.form.get("password") or "").strip()
+		error = None
 
 		if not volunteer_code or not password:
-			return redirect(url_for("volunteer_auth_page"))
-
-		volunteer = Volunteer.query.filter(func.lower(Volunteer.volunteer_code) == volunteer_code.lower()).first()
-
-		if action == "register":
-			if volunteer is None:
-				volunteer = Volunteer(
-					volunteer_code=volunteer_code,
-					password_hash=generate_password_hash(password),
-				)
-				db.session.add(volunteer)
-				db.session.commit()
-				get_or_create_volunteer_profile(volunteer)
-			elif not check_password_hash(volunteer.password_hash, password):
-				return redirect(url_for("volunteer_auth_page"))
-		elif action == "login":
-			if volunteer is None or not check_password_hash(volunteer.password_hash, password):
-				return redirect(url_for("volunteer_auth_page"))
+			error = "Volunteer ID and password are required."
 		else:
-			return redirect(url_for("volunteer_auth_page"))
+			volunteer = Volunteer.query.filter(func.lower(Volunteer.volunteer_code) == volunteer_code.lower()).first()
+			if action == "register":
+				if volunteer is not None:
+					error = "Volunteer already exists. Please log in."
+				else:
+					volunteer = Volunteer(
+						volunteer_code=volunteer_code,
+						password_hash=generate_password_hash(password),
+					)
+					db.session.add(volunteer)
+					db.session.commit()
+					get_or_create_volunteer_profile(volunteer)
+					session["volunteer_id"] = volunteer.id
+					session["volunteer_code"] = volunteer.volunteer_code
+					return redirect(url_for("pages", filename="volunteer_dashboard.html"))
+			elif action == "login":
+				if volunteer is None or not check_password_hash(volunteer.password_hash, password):
+					error = "Invalid volunteer ID or password."
+				else:
+					session["volunteer_id"] = volunteer.id
+					session["volunteer_code"] = volunteer.volunteer_code
+					return redirect(url_for("pages", filename="volunteer_dashboard.html"))
+			else:
+				error = "Invalid action."
 
-		session["volunteer_id"] = volunteer.id
-		session["volunteer_code"] = volunteer.volunteer_code
-		return redirect(url_for("pages", filename="volunteer_dashboard.html"))
+		if is_volunteer_authenticated():
+			return redirect(url_for("pages", filename="volunteer_dashboard.html"))
 
-	if is_volunteer_authenticated():
-		return redirect(url_for("pages", filename="volunteer_dashboard.html"))
-
-	return send_from_directory(BASE_DIR, "volunteer_auth.html")
+		# Render volunteer_auth.html with error message if present
+		from flask import render_template_string
+		with open(BASE_DIR / "volunteer_auth.html", encoding="utf-8") as f:
+			html = f.read()
+		if error:
+			# Insert error message just after <h1 class="title">
+			html = html.replace(
+				'<h1 class="title">Volunteer Portal</h1>',
+				'<h1 class="title">Volunteer Portal</h1><div class="error-message" style="color:red;text-align:center;margin-bottom:10px;">'+error+'</div>'
+			)
+		return render_template_string(html)
 
 
 @app.route("/logout", methods=["GET", "POST"])
